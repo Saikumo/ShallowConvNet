@@ -1,6 +1,4 @@
 import torch
-from braindecode.models import EEGModuleMixin
-
 
 class ShallowConvNet(torch.nn.Sequential):
     def __init__(self, input_shape):
