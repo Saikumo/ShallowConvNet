@@ -40,7 +40,10 @@ def eval_one_epoch(model, loader, criterion):
     return total_loss / len(loader), correct / total
 
 
-def train(epochs, model, train_loader, val_loader, optimizer, criterion):
+def train(epochs, model, train_loader, val_loader, optimizer, criterion, patience=20):
+    best_loss = float("inf")
+    counter = 0
+
     for epoch in range(epochs):
         train_loss, train_acc = train_one_epoch(model, train_loader, optimizer, criterion)
         val_loss, val_acc = eval_one_epoch(model, val_loader, criterion)
@@ -48,3 +51,14 @@ def train(epochs, model, train_loader, val_loader, optimizer, criterion):
         print(f"Epoch {epoch + 1}/{epochs} | "
               f"Train Loss: {train_loss:.4f} Acc: {train_acc:.3f} | "
               f"Val Loss: {val_loss:.4f} Acc: {val_acc:.3f}")
+
+        if val_loss < best_loss - 1e-4:
+            best_loss = val_loss
+            counter = 0
+            torch.save(model.state_dict(), "best.pt")
+        else:
+            counter += 1
+
+        if counter >= patience:
+            print("Early stopping")
+            break
