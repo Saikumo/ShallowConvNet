@@ -1,6 +1,39 @@
 from moabb.datasets import BNCI2014_001
 import torch
 import mne
+from sklearn.model_selection import KFold
+
+
+def preprocess_bnci2014_001(subject_id):
+    X, y = load_bnci2014_001_data_from_moabb(subject_id, train=True)
+
+
+def preprocess_kfold_bnci2014_001(subject_id, n_splits=5, random_state=42):
+    X, y = load_bnci2014_001_data_from_moabb(subject_id, train=True)
+
+    folds = []
+
+    kf = KFold(n_splits=n_splits, shuffle=True, random_state=random_state)
+    for fold, (train_idx, val_idx) in enumerate(kf.split(X)):
+        X_train = X[train_idx]
+        y_train = y[train_idx]
+        X_val = X[val_idx]
+        y_val = y[val_idx]
+
+        mean = X_train.mean(dim=(0, 2), keepdim=True)
+        std = X_train.std(dim=(0, 2), keepdim=True)
+
+        X_train = (X_train - mean) / (std + 1e-9)
+        X_val = (X_val - mean) / (std + 1e-9)
+
+        folds.append({
+            "X_train": X_train,
+            "y_train": y_train,
+            "X_val": X_val,
+            "y_val": y_val,
+        })
+
+    return folds
 
 
 def get_bnci2014_001_event_id():
