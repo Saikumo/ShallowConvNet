@@ -5,7 +5,16 @@ from sklearn.model_selection import KFold
 
 
 def preprocess_bnci2014_001(subject_id):
-    X, y = load_bnci2014_001_data_from_moabb(subject_id, train=True)
+    X_train, y_train = load_bnci2014_001_data_from_moabb(subject_id=subject_id, train=True)
+    X_test, y_test = load_bnci2014_001_data_from_moabb(subject_id=subject_id, train=False)
+
+    mean = X_train.mean(dim=(0, 2), keepdim=True)
+    std = X_train.std(dim=(0, 2), keepdim=True)
+
+    X_train = (X_train - mean) / (std + 1e-9)
+    X_test = (X_test - mean) / (std + 1e-9)
+
+    return X_train, y_train, X_test, y_test
 
 
 def preprocess_kfold_bnci2014_001(subject_id, n_splits=5, random_state=42):

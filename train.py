@@ -1,4 +1,9 @@
+import numpy as np
 import torch
+from preprocess_data import preprocess_bnci2014_001
+from eeg_dataset import EEGDataset
+from torch.utils.data import DataLoader
+import shallow_convnet
 
 
 def train_one_epoch(model, loader, optimizer, criterion):
@@ -40,25 +45,38 @@ def eval_one_epoch(model, loader, criterion):
     return total_loss / len(loader), correct / total
 
 
-def train(epochs, model, train_loader, val_loader, optimizer, criterion, patience=20):
-    best_loss = float("inf")
-    counter = 0
+def train(epochs=10, batch_size=64, lr=1e-3):
+    losses = []
+    accs = []
 
-    for epoch in range(epochs):
-        train_loss, train_acc = train_one_epoch(model, train_loader, optimizer, criterion)
-        val_loss, val_acc = eval_one_epoch(model, val_loader, criterion)
+    for i in range(9):
+        X_train, y_train, X_test, y_test = preprocess_bnci2014_001(i + 1)
+        train_dataset = EEGDataset(X_train, y_train)
+        test_dataset = EEGDataset(X_test, y_test)
+        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+        test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-        print(f"Epoch {epoch + 1}/{epochs} | "
-              f"Train Loss: {train_loss:.4f} Acc: {train_acc:.3f} | "
-              f"Val Loss: {val_loss:.4f} Acc: {val_acc:.3f}")
+        model = shallow_convnet.ShallowConvNet(X_train.shape)
+        criterion = torch.nn.CrossEntropyLoss()
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
-        if val_loss < best_loss - 1e-4:
-            best_loss = val_loss
-            counter = 0
-            torch.save(model.state_dict(), "best.pt")
-        else:
-            counter += 1
+        for epoch in range(epochs):
+            train_loss, train_acc = train_one_epoch(model, train_loader, optimizer, criterion)
 
-        if counter >= patience:
-            print("Early stopping")
-            break
+            print(f"Subject {i + 1}, Epoch {epoch + 1}/{epochs} | "
+                  f"Train Loss: {train_loss:.4f} Acc: {train_acc:.3f} | ")
+
+        test_loss, test_acc = eval_one_epoch(model, test_loader, criterion)
+        losses.append(test_loss)
+        accs.append(test_acc)
+        print(f"Subject {i + 1}, Epoch {epoch + 1}/{epochs} | "
+              f"Test Loss: {test_loss:.4f} Acc: {test_acc:.3f}")
+
+    # 计算均值和标准差（loss 和 accuracy）
+    mean_loss = np.mean(losses)
+    std_loss = np.std(losses)
+    mean_acc = np.mean(accs)
+    std_acc = np.std(accs)
+    # 打印结果
+    print(f"Test Loss: {mean_loss:.4f} ± {std_loss:.4f}")
+    print(f"Accuracy: {mean_acc:.4f} ± {std_acc:.4f}")
