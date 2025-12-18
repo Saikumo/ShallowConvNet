@@ -6,8 +6,8 @@ from torch.utils.data import DataLoader
 import shallow_convnet
 
 
-def train_kfold(patience=20, epochs=100, batch_size=64):
-    folds = preprocess_kfold_bnci2014_001(subject_id=1, n_splits=5, random_state=42)
+def train_kfold(subjectId=1, patience=20, epochs=100, batch_size=64):
+    folds = preprocess_kfold_bnci2014_001(subject_id=subjectId, n_splits=5, random_state=42)
 
     best_epochs = []
     best_losses = []
@@ -63,6 +63,18 @@ def train_kfold(patience=20, epochs=100, batch_size=64):
     mean_acc = np.mean(best_loss_accs)
     std_acc = np.std(best_loss_accs)
     # 打印结果
-    print(f"Median Epoch for final training: {median_epoch}")
+    print(f"Median Epoch for subject{subjectId}: {median_epoch}")
     print(f"Validation Loss: {mean_loss:.4f} ± {std_loss:.4f}")
     print(f"Accuracy at Best Loss: {mean_acc:.4f} ± {std_acc:.4f}")
+    return median_epoch
+
+
+def train_all_kfold():
+    best_epochs = []
+
+    for i in range(9):
+        epoch = train_kfold(subjectId=i + 1)
+        best_epochs.append(epoch)
+
+    median_epoch = int(np.median(best_epochs))
+    print(f"Median Epoch for final training: {median_epoch}")
