@@ -90,6 +90,14 @@ def extract_raw(
         verbose=False,
     )
 
+    # 3. 带通滤波 4–38 Hz（零相位 FIR）
+    epochs.filter(
+        l_freq=4.0,
+        h_freq=38.0,
+        fir_design="firwin",
+        verbose=False,
+    )
+
     # 4. 取数据
     X = epochs.get_data()  # (n_trials, n_channels, n_times)
     y = epochs.events[:, -1]  # label id
