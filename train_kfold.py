@@ -20,10 +20,13 @@ def train_kfold(subjectId=1, patience=20, epochs=100, batch_size=64):
         y_val = fold['y_val']
         train_dataset = EEGDataset(X_train, y_train)
         val_dataset = EEGDataset(X_val, y_val)
-        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-        val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True,
+                                  pin_memory=(device.type == 'cuda'))
+        val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False,
+                                pin_memory=(device.type == 'cuda'))
 
         model = shallow_convnet.ShallowConvNet(X_train.shape)
+        model.to(device)
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 

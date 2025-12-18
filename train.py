@@ -5,6 +5,8 @@ from eeg_dataset import EEGDataset
 from torch.utils.data import DataLoader
 import shallow_convnet
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 def train_one_epoch(model, loader, optimizer, criterion):
     model.train()
@@ -13,6 +15,9 @@ def train_one_epoch(model, loader, optimizer, criterion):
     total = 0
 
     for X, y in loader:
+        X = X.to(device)
+        y = y.to(device)
+
         optimizer.zero_grad()
         logits = model(X)  # 输出 shape = (batch, 4)
 
@@ -36,6 +41,9 @@ def eval_one_epoch(model, loader, criterion):
 
     with torch.no_grad():
         for X, y in loader:
+            X = X.to(device)
+            y = y.to(device)
+
             logits = model(X)
             total_loss += criterion(logits, y).item()
             pred = logits.argmax(dim=1)
@@ -53,10 +61,12 @@ def train(epochs=10, batch_size=64, lr=1e-3):
         X_train, y_train, X_test, y_test = preprocess_bnci2014_001(i + 1)
         train_dataset = EEGDataset(X_train, y_train)
         test_dataset = EEGDataset(X_test, y_test)
-        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-        test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True,
+                                  pin_memory=(device.type == "cuda"))
+        test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, pin_memory=(device.type == "cuda"))
 
         model = shallow_convnet.ShallowConvNet(X_train.shape)
+        model.to(device)
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
