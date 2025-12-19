@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 import shallow_convnet
 
 
-def train_kfold(subjectId=1, patience=20, epochs=100, batch_size=64):
+def train_kfold(device, subjectId=1, patience=20, epochs=100, batch_size=64):
     folds = preprocess_kfold_bnci2014_001(subject_id=subjectId, n_splits=5, random_state=42)
 
     best_epochs = []
@@ -36,8 +36,8 @@ def train_kfold(subjectId=1, patience=20, epochs=100, batch_size=64):
         counter = 0
 
         for epoch in range(epochs):
-            train_loss, train_acc = train_one_epoch(model, train_loader, optimizer, criterion)
-            val_loss, val_acc = eval_one_epoch(model, val_loader, criterion)
+            train_loss, train_acc = train_one_epoch(model, train_loader, optimizer, criterion, device)
+            val_loss, val_acc = eval_one_epoch(model, val_loader, criterion, device)
 
             print(f"Fold {i + 1}, Epoch {epoch + 1}/{epochs} | "
                   f"Train Loss: {train_loss:.4f} Acc: {train_acc:.3f} | "

@@ -5,10 +5,8 @@ from eeg_dataset import EEGDataset
 from torch.utils.data import DataLoader
 import shallow_convnet
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-
-def train_one_epoch(model, loader, optimizer, criterion):
+def train_one_epoch(model, loader, optimizer, criterion, device):
     model.train()
     total_loss = 0
     correct = 0
@@ -33,7 +31,7 @@ def train_one_epoch(model, loader, optimizer, criterion):
     return total_loss / len(loader), correct / total
 
 
-def eval_one_epoch(model, loader, criterion):
+def eval_one_epoch(model, loader, criterion, device):
     model.eval()
     total_loss = 0
     correct = 0
@@ -53,7 +51,7 @@ def eval_one_epoch(model, loader, criterion):
     return total_loss / len(loader), correct / total
 
 
-def train(epochs=10, batch_size=64, lr=1e-3):
+def train(device, epochs=10, batch_size=64, lr=1e-3):
     losses = []
     accs = []
 
@@ -71,12 +69,12 @@ def train(epochs=10, batch_size=64, lr=1e-3):
         optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
         for epoch in range(epochs):
-            train_loss, train_acc = train_one_epoch(model, train_loader, optimizer, criterion)
+            train_loss, train_acc = train_one_epoch(model, train_loader, optimizer, criterion, device)
 
             print(f"Subject {i + 1}, Epoch {epoch + 1}/{epochs} | "
                   f"Train Loss: {train_loss:.4f} Acc: {train_acc:.3f} | ")
 
-        test_loss, test_acc = eval_one_epoch(model, test_loader, criterion)
+        test_loss, test_acc = eval_one_epoch(model, test_loader, criterion, device)
         losses.append(test_loss)
         accs.append(test_acc)
         print(f"Subject {i + 1}, Epoch {epoch + 1}/{epochs} | "
