@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 import shallow_convnet
 
 
-def train_kfold(device, subjectId=1, patience=20, epochs=100, batch_size=64):
+def train_kfold(device, subjectId=1, patience=20, epochs=200, batch_size=64):
     folds = preprocess_kfold_bnci2014_001(subject_id=subjectId, n_splits=5, random_state=42)
 
     best_epochs = []

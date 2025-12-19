@@ -1,6 +1,7 @@
 import argparse
 from train_kfold import train_kfold
 import torch
+import os
 
 
 def train_kfold_script(local_rank):
@@ -19,6 +20,7 @@ def train_kfold_script(local_rank):
 
         print(f"Subject {subject}: best epoch = {best_epoch}")
 
+        os.makedirs("results", exist_ok=True)  # 如果目录不存在就创建
         with open(f"results/subj_{subject}.txt", "w") as f:
             f.write(str(best_epoch))
 
