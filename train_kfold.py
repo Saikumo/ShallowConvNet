@@ -1,3 +1,5 @@
+import torch
+
 from eeg_dataset import EEGDataset
 from preprocess_data import *
 from train import *
@@ -76,7 +78,7 @@ def train_all_kfold():
     best_epochs = []
 
     for i in range(9):
-        epoch = train_kfold(subjectId=i + 1)
+        epoch = train_kfold(subjectId=i + 1,device=torch.device("cuda"))
         best_epochs.append(epoch)
 
     median_epoch = int(np.median(best_epochs))
