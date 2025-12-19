@@ -15,6 +15,9 @@ def train_kfold_script(local_rank):
     print(f"device {device}")
 
     for subject in subjects:
+
+        print(f"test subject {subject}")
+
         best_epoch = train_kfold(
             subjectId=subject,
             device=device
