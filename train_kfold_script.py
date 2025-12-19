@@ -12,6 +12,8 @@ def train_kfold_script(local_rank):
         subjects = [2, 4, 6, 8]
         device = torch.device('cuda:1')
 
+    print(f"device {device}")
+
     for subject in subjects:
         best_epoch = train_kfold(
             subjectId=subject,
