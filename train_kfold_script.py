@@ -1,17 +1,22 @@
 import argparse
 from train_kfold import train_kfold
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--subject", type=int)
-parser.add_argument("--gpu", type=int)
-args = parser.parse_args()
 
-best_epoch = train_kfold(
-    subjectId=args.subject,
-    device=f'cuda:{args.gpu}'
-)
+def train_kfold_script(local_rank):
+    if (local_rank == 0):
+        subjects = [1, 3, 5, 7, 9]sc
+        device = 'cuda:0'
+    else:
+        subjects = [2, 4, 6, 8]
+        device = 'cuda:1'
 
-print(f"Subject {args.subject}: best epoch = {best_epoch}")
+    for subject in subjects:
+        best_epoch = train_kfold(
+            subjectId=subject,
+            device=device
+        )
 
-with open(f"results/subj_{args.subject}.txt", "w") as f:
-    f.write(str(best_epoch))
+        print(f"Subject {subject}: best epoch = {best_epoch}")
+
+        with open(f"results/subj_{subject}.txt", "w") as f:
+            f.write(str(best_epoch))
