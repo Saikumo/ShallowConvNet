@@ -51,7 +51,7 @@ def eval_one_epoch(model, loader, criterion, device):
     return total_loss / len(loader), correct / total
 
 
-def train(device, epochs=10, batch_size=64, lr=1e-3):
+def train(device, epochs=34, batch_size=64, lr=1e-3):
     losses = []
     accs = []
 
