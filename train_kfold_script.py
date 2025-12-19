@@ -1,14 +1,15 @@
 import argparse
 from train_kfold import train_kfold
+import torch
 
 
 def train_kfold_script(local_rank):
     if (local_rank == 0):
         subjects = [1, 3, 5, 7, 9]
-        device = 'cuda:0'
+        device = torch.device('cuda:0')
     else:
         subjects = [2, 4, 6, 8]
-        device = 'cuda:1'
+        device = torch.device('cuda:1')
 
     for subject in subjects:
         best_epoch = train_kfold(
