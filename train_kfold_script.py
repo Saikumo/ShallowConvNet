@@ -20,3 +20,11 @@ def train_kfold_script(local_rank):
 
         with open(f"results/subj_{subject}.txt", "w") as f:
             f.write(str(best_epoch))
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--local_rank", type=int, required=True)
+    args = parser.parse_args()
+
+    train_kfold_script(args.local_rank)
