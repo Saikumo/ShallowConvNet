@@ -1,5 +1,7 @@
 import numpy as np
 import torch
+from sklearn.metrics import cohen_kappa_score
+
 from preprocess_data import preprocess_bnci2014_001
 from eeg_dataset import EEGDataset
 from torch.utils.data import DataLoader
@@ -11,6 +13,8 @@ def train_one_epoch(model, loader, optimizer, criterion, device):
     total_loss = 0
     correct = 0
     total = 0
+    all_preds = []
+    all_labels = []
 
     for X, y in loader:
         X = X.to(device)
@@ -28,7 +32,10 @@ def train_one_epoch(model, loader, optimizer, criterion, device):
         correct += (pred == y).sum().item()
         total += y.size(0)
 
-    return total_loss / len(loader), correct / total
+        all_preds.append(pred.detach().cpu())
+        all_labels.append(y.detach().cpu())
+
+    return total_loss / len(loader), correct / total, cohen_kappa_score(all_preds, all_labels)
 
 
 def eval_one_epoch(model, loader, criterion, device):
@@ -36,6 +43,8 @@ def eval_one_epoch(model, loader, criterion, device):
     total_loss = 0
     correct = 0
     total = 0
+    all_preds = []
+    all_labels = []
 
     with torch.no_grad():
         for X, y in loader:
@@ -48,7 +57,10 @@ def eval_one_epoch(model, loader, criterion, device):
             correct += (pred == y).sum().item()
             total += y.size(0)
 
-    return total_loss / len(loader), correct / total
+            all_preds.append(pred.detach().cpu())
+            all_labels.append(y.detach().cpu())
+
+    return total_loss / len(loader), correct / total, cohen_kappa_score(all_preds, all_labels)
 
 
 def train(device, epochs=34, batch_size=64, lr=1e-3):
