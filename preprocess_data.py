@@ -3,6 +3,8 @@ import torch
 import mne
 from sklearn.model_selection import KFold
 
+import common
+
 
 def preprocess_bnci2014_001(subject_id):
     X_train, y_train = load_bnci2014_001_data_from_moabb(subject_id=subject_id, train=True)
@@ -17,7 +19,7 @@ def preprocess_bnci2014_001(subject_id):
     return X_train, y_train, X_test, y_test
 
 
-def preprocess_kfold_bnci2014_001(subject_id, n_splits=5, random_state=6):
+def preprocess_kfold_bnci2014_001(subject_id, n_splits=5, random_state=common.random_seed):
     X, y = load_bnci2014_001_data_from_moabb(subject_id, train=True)
 
     folds = []

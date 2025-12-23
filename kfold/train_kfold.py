@@ -1,5 +1,7 @@
 from sklearn.metrics import cohen_kappa_score
 
+import common
+from eeg_dataset import EEGDataset
 from preprocess_data import *
 from train_one_epoch import *
 import numpy as np
@@ -25,14 +27,18 @@ def train_kfold(device, subjectId=1, patience=20, epochs=200, batch_size=64):
         train_dataset = EEGDataset(X_train, y_train)
         val_dataset = EEGDataset(X_val, y_val)
         train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True,
-                                  pin_memory=(device.type == 'cuda'))
+                                  pin_memory=(device.type == 'cuda'),
+                                  worker_init_fn=lambda _: np.random.seed(common.random_seed),
+                                  num_workers=0)
         val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False,
-                                pin_memory=(device.type == 'cuda'))
+                                pin_memory=(device.type == 'cuda'),
+                                worker_init_fn=lambda _: np.random.seed(common.random_seed),
+                                num_workers=0)
 
         model = shallow_convnet.ShallowConvNet(X_train.shape)
         model.to(device)
         criterion = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+        optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, eps=1e-8)
 
         best_loss = float("inf")
         best_epoch = 0
