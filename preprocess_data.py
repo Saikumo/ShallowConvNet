@@ -75,8 +75,8 @@ def load_bnci2014_001_data_from_moabb(subject_id, train):
 
 def extract_raw(
         run,
-        tmin=0.5,
-        tmax=4.5,
+        tmin=0.0,
+        tmax=4.0,
         l_freq=0.0,
         h_freq=38.0,
 ):
@@ -104,12 +104,12 @@ def extract_raw(
     )
 
     # 3. 带通滤波
-    epochs.filter(
-        l_freq=l_freq,
-        h_freq=h_freq,
-        fir_design="firwin",
-        verbose=False,
-    )
+    # epochs.filter(
+    #     # l_freq=l_freq,
+    #     # h_freq=h_freq,
+    #     fir_design="firwin",
+    #     verbose=False,
+    # )
 
     # 4. 取数据
     X = epochs.get_data()  # (n_trials, n_channels, n_times)
