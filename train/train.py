@@ -1,72 +1,11 @@
 import numpy as np
 import torch
-from sklearn.metrics import cohen_kappa_score
 
 from preprocess_data import preprocess_bnci2014_001
 from eeg_dataset import EEGDataset
 from torch.utils.data import DataLoader
 import shallow_convnet
-
-
-def train_one_epoch(model, loader, optimizer, criterion, device):
-    model.train()
-    total_loss = 0
-    correct = 0
-    total = 0
-    all_preds = []
-    all_labels = []
-
-    for X, y in loader:
-        X = X.to(device)
-        y = y.to(device)
-
-        optimizer.zero_grad()
-        logits = model(X)  # 输出 shape = (batch, 4)
-
-        loss = criterion(logits, y)
-        loss.backward()
-        optimizer.step()
-
-        total_loss += loss.item()
-        pred = logits.argmax(dim=1)
-        correct += (pred == y).sum().item()
-        total += y.size(0)
-
-        all_preds.append(pred.detach().cpu())
-        all_labels.append(y.detach().cpu())
-
-    all_preds = torch.cat(all_preds).flatten().numpy()
-    all_labels = torch.cat(all_labels).flatten().numpy()
-
-    return total_loss / len(loader), correct / total, cohen_kappa_score(all_preds, all_labels)
-
-
-def eval_one_epoch(model, loader, criterion, device):
-    model.eval()
-    total_loss = 0
-    correct = 0
-    total = 0
-    all_preds = []
-    all_labels = []
-
-    with torch.no_grad():
-        for X, y in loader:
-            X = X.to(device)
-            y = y.to(device)
-
-            logits = model(X)
-            total_loss += criterion(logits, y).item()
-            pred = logits.argmax(dim=1)
-            correct += (pred == y).sum().item()
-            total += y.size(0)
-
-            all_preds.append(pred.detach().cpu())
-            all_labels.append(y.detach().cpu())
-
-    all_preds = torch.cat(all_preds).flatten().numpy()
-    all_labels = torch.cat(all_labels).flatten().numpy()
-
-    return total_loss / len(loader), correct / total, cohen_kappa_score(all_preds, all_labels)
+from train_one_epoch import train_one_epoch, eval_one_epoch
 
 
 def train(device, epochs=34, batch_size=64, lr=1e-3):

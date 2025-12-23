@@ -17,7 +17,7 @@ def preprocess_bnci2014_001(subject_id):
     return X_train, y_train, X_test, y_test
 
 
-def preprocess_kfold_bnci2014_001(subject_id, n_splits=5, random_state=42):
+def preprocess_kfold_bnci2014_001(subject_id, n_splits=5, random_state=6):
     X, y = load_bnci2014_001_data_from_moabb(subject_id, train=True)
 
     folds = []
@@ -76,6 +76,8 @@ def extract_raw(
         run,
         tmin=0.0,
         tmax=4.0,
+        l_freq=0.0,
+        h_freq=38.0,
 ):
     """
     run: mne.io.BaseRaw (Raw / RawArray / RawBrainVision)
@@ -101,10 +103,9 @@ def extract_raw(
 
     # 3. 带通滤波
     epochs.filter(
-        l_freq=0.1,
-        h_freq=38.0,
+        l_freq=l_freq,
+        h_freq=h_freq,
         fir_design="firwin",
-        verbose=False,
     )
 
     # 4. 取数据

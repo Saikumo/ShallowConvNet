@@ -1,7 +1,7 @@
 from sklearn.metrics import cohen_kappa_score
 
 from preprocess_data import *
-from train import *
+from train_one_epoch import *
 import numpy as np
 from torch.utils.data import DataLoader
 import shallow_convnet
