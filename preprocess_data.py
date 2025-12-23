@@ -75,7 +75,7 @@ def load_bnci2014_001_data_from_moabb(subject_id, train):
 
 def extract_raw(
         run,
-        tmin=-0.5,
+        tmin=0.5,
         tmax=4.0,
         l_freq=0.0,
         h_freq=38.0,
