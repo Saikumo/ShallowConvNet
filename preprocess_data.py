@@ -99,9 +99,9 @@ def extract_raw(
         verbose=False,
     )
 
-    # 3. 带通滤波 4–38 Hz（零相位 FIR）
+    # 3. 带通滤波
     epochs.filter(
-        l_freq=0.0,
+        l_freq=0.1,
         h_freq=38.0,
         fir_design="firwin",
         verbose=False,
