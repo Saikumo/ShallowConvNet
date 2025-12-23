@@ -79,7 +79,7 @@ def extract_raw(
         tmin=0.0,
         tmax=4.0,
         l_freq=0.0,
-        h_freq=120.0,
+        h_freq=38.0,
 ):
     """
     run: mne.io.BaseRaw (Raw / RawArray / RawBrainVision)
