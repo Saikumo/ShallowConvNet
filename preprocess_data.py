@@ -48,8 +48,7 @@ def preprocess_kfold_bnci2014_001(subject_id, n_splits=5, random_state=common.ra
 
 
 def get_bnci2014_001_event_id():
-    run = BNCI2014_001().get_data(subjects=[1])[1]['0train']['0']
-    events, event_id = mne.events_from_annotations(run)
+    event_id = BNCI2014_001().event_id
     # 将 event_id 的值映射到 0,1,2,3
     min_val = min(event_id.values())
     event_id = {k: v - min_val for k, v in event_id.items()}
@@ -76,7 +75,7 @@ def load_bnci2014_001_data_from_moabb(subject_id, train):
 
 def extract_raw(
         run,
-        tmin=0.0,
+        tmin=-0.5,
         tmax=4.0,
         l_freq=0.0,
         h_freq=38.0,
