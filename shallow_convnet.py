@@ -27,7 +27,6 @@ class ShallowConvNet(torch.nn.Sequential):
         init.xavier_uniform_(self.time_conv.conv_time.weight)
         init.constant_(self.time_conv.conv_time.bias, 0)
         init.xavier_uniform_(self.spat_conv.conv_spat.weight)
-        init.constant_(self.spat_conv.conv_spat.bias, 0)
         init.constant_(self.batch_norm.bn.weight, 1)
         init.constant_(self.batch_norm.bn.bias, 0)
         init.xavier_uniform_(self.final_conv.conv_final.weight)
