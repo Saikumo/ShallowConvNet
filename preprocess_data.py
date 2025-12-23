@@ -78,7 +78,7 @@ def extract_raw(
         run,
         tmin=0.0,
         tmax=4.0,
-        l_freq=0.0,
+        l_freq=0.1,
         h_freq=38.0,
 ):
     """
