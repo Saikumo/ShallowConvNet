@@ -1,4 +1,6 @@
 import torch
+from torch.nn import init
+
 
 class ShallowConvNet(torch.nn.Sequential):
     def __init__(self, input_shape):
@@ -21,6 +23,15 @@ class ShallowConvNet(torch.nn.Sequential):
 
         self.add_module("final_conv", FinalConv(final_conv_length=self.final_conv_length))
         self.add_module("final_squeeze", FinalSqueeze())
+
+        init.xavier_uniform_(self.time_conv.weight)
+        init.constant_(self.time_conv.bias, 0)
+        init.xavier_uniform_(self.spat_conv.weight)
+        init.constant_(self.spat_conv.bias, 0)
+        init.constant_(self.batch_norm.weight, 1)
+        init.constant_(self.batch_norm.bias, 0)
+        init.xavier_uniform_(self.final_conv.weight)
+        init.constant_(self.final_conv.bias, 0)
 
 
 class Ensure4d(torch.nn.Module):
