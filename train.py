@@ -63,6 +63,9 @@ def eval_one_epoch(model, loader, criterion, device):
             all_preds.append(pred.detach().cpu())
             all_labels.append(y.detach().cpu())
 
+    all_preds = torch.cat(all_preds).flatten().numpy()
+    all_labels = torch.cat(all_labels).flatten().numpy()
+
     return total_loss / len(loader), correct / total, cohen_kappa_score(all_preds, all_labels)
 
 
