@@ -108,6 +108,7 @@ def extract_raw(
         l_freq=l_freq,
         h_freq=h_freq,
         fir_design="firwin",
+        verbose=False,
     )
 
     # 4. 取数据

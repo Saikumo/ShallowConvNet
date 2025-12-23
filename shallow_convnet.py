@@ -24,14 +24,14 @@ class ShallowConvNet(torch.nn.Sequential):
         self.add_module("final_conv", FinalConv(final_conv_length=self.final_conv_length))
         self.add_module("final_squeeze", FinalSqueeze())
 
-        init.xavier_uniform_(self.time_conv.weight)
-        init.constant_(self.time_conv.bias, 0)
-        init.xavier_uniform_(self.spat_conv.weight)
-        init.constant_(self.spat_conv.bias, 0)
-        init.constant_(self.batch_norm.weight, 1)
-        init.constant_(self.batch_norm.bias, 0)
-        init.xavier_uniform_(self.final_conv.weight)
-        init.constant_(self.final_conv.bias, 0)
+        init.xavier_uniform_(self.time_conv.conv_time.weight)
+        init.constant_(self.time_conv.conv_time.bias, 0)
+        init.xavier_uniform_(self.spat_conv.conv_spat.weight)
+        init.constant_(self.spat_conv.conv_spat.bias, 0)
+        init.constant_(self.batch_norm.bn.weight, 1)
+        init.constant_(self.batch_norm.bn.bias, 0)
+        init.xavier_uniform_(self.final_conv.conv_final.weight)
+        init.constant_(self.final_conv.conv_final.bias, 0)
 
 
 class Ensure4d(torch.nn.Module):
