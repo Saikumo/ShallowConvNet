@@ -59,7 +59,7 @@ class TimeConv(torch.nn.Module):
 
 class SpatConv(torch.nn.Module):
     def __init__(self,
-                 in_channels=26,
+                 in_channels=22,
                  n_filters_time=40,
                  n_filters_spat=40,
                  bias_spat=False):

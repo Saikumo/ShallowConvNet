@@ -101,6 +101,7 @@ def extract_raw(
         baseline=None,
         preload=True,
         verbose=False,
+        picks=mne.pick_types(run.info, eeg=True, eog=False, meg=False, stim=False, exclude='bads'),
     )
 
     # 3. 带通滤波
