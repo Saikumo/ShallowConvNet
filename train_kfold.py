@@ -38,7 +38,7 @@ def train_kfold(device, subjectId=1, patience=20, epochs=200, batch_size=64):
         best_epoch = 0
         best_loss_acc = float("inf")
         counter = 0
-        best_losses_kappas = float("inf")
+        best_loss_kappa = float("inf")
 
         for epoch in range(epochs):
             train_loss, train_acc, train_kappa = train_one_epoch(model, train_loader, optimizer, criterion, device)
@@ -53,7 +53,7 @@ def train_kfold(device, subjectId=1, patience=20, epochs=200, batch_size=64):
                 best_epoch = epoch + 1
                 best_loss_acc = val_acc
                 counter = 0
-                best_losses_kappas = val_kappa
+                best_loss_kappa = val_kappa
                 print(f"Fold {i + 1}, Epoch {epoch + 1}/{epochs} | "
                       f"Train Loss: {train_loss:.4f} Acc: {train_acc:.4f} Train Kappa: {train_kappa:.4f} | "
                       f"Val Loss: {val_loss:.4f} Acc: {val_acc:.4f} Val Kappa: {val_kappa:.4f}")
@@ -65,7 +65,7 @@ def train_kfold(device, subjectId=1, patience=20, epochs=200, batch_size=64):
                 best_epochs.append(best_epoch)
                 best_losses.append(best_loss)
                 best_loss_accs.append(best_loss_acc)
-                best_losses_kappas.append(best_losses_kappas)
+                best_losses_kappas.append(best_loss_kappa)
                 break
 
     # 取 epoch 的中位数作为最终训练 epoch
