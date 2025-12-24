@@ -1,6 +1,7 @@
 from moabb.datasets import BNCI2014_001
 import torch
 import mne
+from moabb.paradigms import MotorImagery
 from sklearn.model_selection import KFold
 
 import common
@@ -55,68 +56,12 @@ def get_bnci2014_001_event_id():
     return event_id
 
 
-def load_bnci2014_001_data_from_moabb(subject_id, train):
+def load_bnci2014_001_data_from_moabb(subject_id, train, fmin=0, fmax=38, tmin=0, tmax=4):
     dataset = BNCI2014_001()
-    subject_data = dataset.get_data(subjects=[subject_id])
+    paradigm = MotorImagery(n_classes=4, fmin=fmin, fmax=fmax, tmin=tmin, tmax=tmax)
+    X_all, labels_all, metadata = paradigm.get_data(dataset=dataset, subjects=[subject_id])
     session = '0train' if train else '1test'
-
-    X_list, y_list = [], []
-
-    for run_id in subject_data[subject_id][session].keys():
-        run = subject_data[subject_id][session][run_id]
-        X_run, y_run = extract_raw(run)
-        X_list.append(X_run)
-        y_list.append(y_run)
-
-    X_all = torch.cat(X_list, dim=0)  # (N, C, T)
-    y_all = torch.cat(y_list, dim=0)  # (N,)
-    return X_all, y_all
-
-
-def extract_raw(
-        run,
-        tmin=0.0,
-        tmax=4.0,
-        l_freq=0.0,
-        h_freq=38.0,
-):
-    """
-    run: mne.io.BaseRaw (Raw / RawArray / RawBrainVision)
-    return:
-        X: torch.FloatTensor (n_trials, n_channels, n_times)
-        y: torch.LongTensor  (n_trials,)
-    """
-
-    # 1. 从 annotations 中提取事件
-    events, event_id = mne.events_from_annotations(run)
-
-    # 3. 构造 Epochs（标准做法）
-    epochs = mne.Epochs(
-        run,
-        events=events,
-        event_id=event_id,
-        tmin=tmin,
-        tmax=tmax,
-        baseline=None,
-        preload=True,
-        verbose=False,
-        picks=mne.pick_types(run.info, eeg=True, eog=False, meg=False, stim=False, exclude='bads'),
-    )
-
-    # 3. 带通滤波
-    # epochs.filter(
-    #     # l_freq=l_freq,
-    #     # h_freq=h_freq,
-    #     fir_design="firwin",
-    #     verbose=False,
-    # )
-
-    # 4. 取数据
-    X = epochs.get_data()  # (n_trials, n_channels, n_times)
-    y = epochs.events[:, -1]  # label id
-    y = y - y.min()  # 映射到 0,1,2,3
-
-    return (
-        torch.tensor(X, dtype=torch.float32),
-        torch.tensor(y, dtype=torch.long),
-    )
+    X = X_all[metadata['session'] == session]
+    labels = labels_all[metadata['session'] == session]
+    y = [get_bnci2014_001_event_id()[label] for label in labels]
+    return torch.tensor(X, dtype=torch.float32), torch.tensor(y, dtype=torch.long)
