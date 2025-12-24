@@ -56,7 +56,7 @@ def get_bnci2014_001_event_id():
     return event_id
 
 
-def load_bnci2014_001_data_from_moabb(subject_id, train, fmin=0, fmax=38, tmin=0, tmax=4):
+def load_bnci2014_001_data_from_moabb(subject_id, train, fmin=0, fmax=38, tmin=-0.5, tmax=3.5):
     dataset = BNCI2014_001()
     paradigm = MotorImagery(n_classes=4, fmin=fmin, fmax=fmax, tmin=tmin, tmax=tmax)
     X_all, labels_all, metadata = paradigm.get_data(dataset=dataset, subjects=[subject_id])
