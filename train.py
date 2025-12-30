@@ -1,11 +1,11 @@
 import numpy as np
 import torch
 
-from preprocess_data import preprocess_bnci2014_001
+from preprocess.preprocess_data import preprocess_bnci2014_001
 from eeg_dataset import EEGDataset
 from torch.utils.data import DataLoader
-import shallow_convnet
-from train_one_epoch import train_one_epoch, eval_one_epoch
+from naive_implement import shallow_convnet
+from naive_implement.train_one_epoch import train_one_epoch, eval_one_epoch
 
 
 def train(device, epochs=34, batch_size=64, lr=1e-3):

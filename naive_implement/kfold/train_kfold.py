@@ -1,12 +1,9 @@
-from sklearn.metrics import cohen_kappa_score
-
-import common
 from eeg_dataset import EEGDataset
-from preprocess_data import *
-from train_one_epoch import *
+from preprocess.preprocess_data import *
+from naive_implement.train_one_epoch import *
 import numpy as np
 from torch.utils.data import DataLoader
-import shallow_convnet
+from naive_implement import shallow_convnet
 
 
 def train_kfold(device, subjectId=1, patience=20, epochs=200, batch_size=64):
