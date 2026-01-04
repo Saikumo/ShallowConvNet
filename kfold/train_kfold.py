@@ -32,7 +32,7 @@ def train_kfold(device, subjectId=1, patience=20, epochs=200, batch_size=64):
                                 worker_init_fn=lambda _: np.random.seed(common.random_seed),
                                 num_workers=0)
 
-        model = ShallowConvNetSpeedup(X_train.shape)
+        model = ShallowConvNetSpeedup()
         model.to(device)
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, eps=1e-8)
