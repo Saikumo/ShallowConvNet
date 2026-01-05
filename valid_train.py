@@ -7,7 +7,7 @@ from naive_implement import shallow_convnet
 from preprocess.process_data_sample import preprocess_bnci2014_001_sample
 
 
-def valid_train(device, subjectId=1, patience=20, epochs=200, batch_size=1):
+def valid_train(device, subjectId=1, patience=20, epochs=200, batch_size=4):
     X, y = preprocess_bnci2014_001_sample(tmin=-0.5, tmax=4)
     X = X[0:20, :, :1118]
     y = y[0:20]
