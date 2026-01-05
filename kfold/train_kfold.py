@@ -6,8 +6,8 @@ import numpy as np
 from torch.utils.data import DataLoader
 
 
-def train_kfold(device, subjectId=1, patience=20, epochs=50, batch_size=64):
-    folds = preprocess_kfold_bnci2014_001(subject_id=subjectId, n_splits=5)
+def train_kfold(device, subjectId=1, patience=20, epochs=1000, batch_size=64):
+    folds = preprocess_kfold_bnci2014_001(subject_id=subjectId, n_splits=1)
 
     print(f"device {device},subject {subjectId}")
 
