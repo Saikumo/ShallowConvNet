@@ -58,7 +58,7 @@ def valid_train(device, subjectId=1, patience=20, epochs=200, batch_size=1):
             best_loss_acc = val_acc
             counter = 0
             best_loss_kappa = val_kappa
-            print(f"Fold {i + 1}, Epoch {epoch + 1}/{epochs} | "
+            print(f"Epoch {epoch + 1}/{epochs} | "
                   f"Train Loss: {train_loss:.4f} Acc: {train_acc:.4f} Train Kappa: {train_kappa:.4f} | "
                   f"Val Loss: {val_loss:.4f} Acc: {val_acc:.4f} Val Kappa: {val_kappa:.4f}")
         else:
@@ -87,14 +87,3 @@ def valid_train(device, subjectId=1, patience=20, epochs=200, batch_size=1):
     print(f"Accuracy at Best Loss: {mean_acc:.4f} ± {std_acc:.4f}")
     print(f"Kappa at Best Loss: {mean_kappa:.4f} ± {std_kappa:.4f}")
     return median_epoch
-
-
-def train_all_kfold():
-    best_epochs = []
-
-    for i in range(9):
-        epoch = train_kfold(subjectId=i + 1, device=torch.device("cuda"))
-        best_epochs.append(epoch)
-
-    median_epoch = int(np.median(best_epochs))
-    print(f"Median Epoch for final training: {median_epoch}")
