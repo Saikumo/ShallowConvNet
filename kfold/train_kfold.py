@@ -24,9 +24,9 @@ def train_kfold(device, subjectId=1, patience=20, epochs=200, batch_size=64):
         train_dataset = EEGDataset(X_train, y_train)
         val_dataset = EEGDataset(X_val, y_val)
         train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True,
-                                  pin_memory=(device.type == 'cuda'), num_workers=8, persistent_workers=True)
+                                  pin_memory=(device.type == 'cuda'), num_workers=4, persistent_workers=True)
         val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False,
-                                pin_memory=(device.type == 'cuda'), num_workers=8, persistent_workers=True)
+                                pin_memory=(device.type == 'cuda'), num_workers=4, persistent_workers=True)
 
         model = ShallowConvNetSpeedup()
         model.to(device)
