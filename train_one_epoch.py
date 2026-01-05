@@ -1,5 +1,6 @@
 import torch
 from sklearn.metrics import cohen_kappa_score
+import torch.nn.functional as F
 
 
 def train_one_epoch(model, loader, optimizer, criterion, device):
@@ -18,7 +19,12 @@ def train_one_epoch(model, loader, optimizer, criterion, device):
         logits = model(X)  # 输出 shape = (batch, 4)
         y_crop = y.repeat_interleave(619)
 
-        loss = criterion(logits, y_crop)
+        p = F.log_softmax(logits, dim=1)
+        p = p.view(B, 619, -1)
+
+        tied = F.mse_loss(p[:, :-1], p[:, 1:])
+        loss = criterion(logits, y_crop) + tied
+
         loss.backward()
         optimizer.step()
 
@@ -55,7 +61,13 @@ def eval_one_epoch(model, loader, criterion, device):
             logits = model(X)
             y_crop = y.repeat_interleave(619)
 
-            total_loss += criterion(logits, y_crop).item()
+            p = F.log_softmax(logits, dim=1)
+            p = p.view(B, 619, -1)
+
+            tied = F.mse_loss(p[:, :-1], p[:, 1:])
+            loss = criterion(logits, y_crop) + tied
+
+            total_loss += loss.item()
 
             B = y.size(0)
             logits_trial = logits.view(B, 619, 4).mean(dim=1)
