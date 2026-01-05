@@ -15,6 +15,8 @@ def train_one_epoch(model, loader, optimizer, criterion, device):
         X = X.to(device)
         y = y.to(device)
 
+        B = y.size(0)
+
         optimizer.zero_grad()
         logits = model(X)  # 输出 shape = (batch, 4)
         y_crop = y.repeat_interleave(619)
@@ -30,7 +32,7 @@ def train_one_epoch(model, loader, optimizer, criterion, device):
 
         total_loss += loss.item()
 
-        B = y.size(0)
+
         logits_trial = logits.view(B, 619, 4).mean(dim=1)
         pred = logits_trial.argmax(dim=1)
         correct += (pred == y).sum().item()
@@ -58,6 +60,9 @@ def eval_one_epoch(model, loader, criterion, device):
             X = X.to(device)
             y = y.to(device)
 
+            B = y.size(0)
+
+
             logits = model(X)
             y_crop = y.repeat_interleave(619)
 
@@ -69,7 +74,6 @@ def eval_one_epoch(model, loader, criterion, device):
 
             total_loss += loss.item()
 
-            B = y.size(0)
             logits_trial = logits.view(B, 619, 4).mean(dim=1)
             pred = logits_trial.argmax(dim=1)
             correct += (pred == y).sum().item()
