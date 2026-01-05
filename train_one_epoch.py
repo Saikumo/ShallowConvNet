@@ -53,8 +53,9 @@ def eval_one_epoch(model, loader, criterion, device):
             y = y.to(device)
 
             logits = model(X)
+            y_crop = y.repeat_interleave(619)
 
-            total_loss += criterion(logits, y).item()
+            total_loss += criterion(logits, y_crop).item()
 
             B = y.size(0)
             logits_trial = logits.view(B, 619, 4).mean(dim=1)
