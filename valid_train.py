@@ -9,8 +9,8 @@ from preprocess.process_data_sample import preprocess_bnci2014_001_sample
 
 def valid_train(device, subjectId=1, patience=20, epochs=200, batch_size=1):
     X, y = preprocess_bnci2014_001_sample(tmin=-0.5, tmax=4)
-    X = X[0:2, :, :1118]
-    y = y[0:2]
+    X = X[0:20, :, :1118]
+    y = y[0:20]
 
     print(f"device {device},subject {subjectId}")
 
@@ -19,10 +19,10 @@ def valid_train(device, subjectId=1, patience=20, epochs=200, batch_size=1):
     best_loss_accs = []
     best_losses_kappas = []
 
-    X_train = X[0:1,:,:]
-    y_train = y[0:1]
-    X_val = X[1:2,:,:]
-    y_val = y[1:2]
+    X_train = X[0:10,:,:]
+    y_train = y[0:10]
+    X_val = X[10:20,:,:]
+    y_val = y[10:20]
     train_dataset = EEGDataset(X_train, y_train)
     val_dataset = EEGDataset(X_val, y_val)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True,
