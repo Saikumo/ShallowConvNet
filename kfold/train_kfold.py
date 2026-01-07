@@ -32,7 +32,7 @@ def train_kfold(device, subjectId=1, patience=20, epochs=1000, batch_size=64):
         model = ShallowConvNetSpeedup()
         model.to(device)
         criterion = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(model.parameters(), lr=1e-2, eps=1e-8)
+        optimizer = torch.optim.Adam(model.parameters(), lr=0.0625 * 0.01, eps=1e-8)
 
         best_loss = float("inf")
         best_epoch = 0
