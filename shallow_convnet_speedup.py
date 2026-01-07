@@ -143,6 +143,6 @@ class FinalSqueeze(torch.nn.Module):
                 crop = crop.squeeze(-1)
                 crop = crop.squeeze(-1)
                 crop_mean_pool_logits.append(crop)
-                mean_logits.append(torch.stack(crop_mean_pool_logits, dim=0).mean(dim=0))
+            mean_logits.append(torch.stack(crop_mean_pool_logits, dim=0).mean(dim=0))
 
         return torch.stack(mean_logits, dim=0)
