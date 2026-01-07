@@ -132,8 +132,9 @@ class FinalSqueeze(torch.nn.Module):
     def forward(self, x):
         crop_num = 619  # 1118 - 500 + 1
         batch = x.shape[0] // 15
-        crop_mean_pool_logits = []
+        mean_logits = []
         for batch_no in range(batch):
+            crop_mean_pool_logits = []
             for i in range(crop_num):
                 index = i % 15
                 skip = i // 15
@@ -141,7 +142,7 @@ class FinalSqueeze(torch.nn.Module):
                 crop = x[batch_index, :, skip + 0: skip + 1, :]
                 crop = crop.squeeze(-1)
                 crop = crop.squeeze(-1)
-
                 crop_mean_pool_logits.append(crop)
+                mean_logits.append(torch.stack(crop_mean_pool_logits, dim=0).mean(dim=0))
 
-        return torch.stack(crop_mean_pool_logits, dim=0)
+        return torch.stack(mean_logits, dim=0)

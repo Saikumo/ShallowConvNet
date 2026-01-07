@@ -15,26 +15,15 @@ def train_one_epoch(model, loader, optimizer, criterion, device):
         X = X.to(device)
         y = y.to(device)
 
-        B = y.size(0)
-
         optimizer.zero_grad()
-        logits = model(X)  # 输出 shape = (batch, 4)
-        y_crop = y.repeat_interleave(619)
-
-        p = F.log_softmax(logits, dim=1)
-        p = p.view(B, 619, -1)
-
-        tied = F.mse_loss(p[:, :-1], p[:, 1:])
-        loss = criterion(logits, y_crop) + tied
+        logits = model(X)
+        loss = criterion(logits, y)
 
         loss.backward()
         optimizer.step()
 
         total_loss += loss.item()
-
-
-        logits_trial = logits.view(B, 619, 4).mean(dim=1)
-        pred = logits_trial.argmax(dim=1)
+        pred = logits.argmax(dim=1)
         correct += (pred == y).sum().item()
         total += y.size(0)
 
@@ -60,22 +49,11 @@ def eval_one_epoch(model, loader, criterion, device):
             X = X.to(device)
             y = y.to(device)
 
-            B = y.size(0)
-
-
             logits = model(X)
-            y_crop = y.repeat_interleave(619)
-
-            p = F.log_softmax(logits, dim=1)
-            p = p.view(B, 619, -1)
-
-            tied = F.mse_loss(p[:, :-1], p[:, 1:])
-            loss = criterion(logits, y_crop) + tied
+            loss = criterion(logits, y)
 
             total_loss += loss.item()
-
-            logits_trial = logits.view(B, 619, 4).mean(dim=1)
-            pred = logits_trial.argmax(dim=1)
+            pred = logits.argmax(dim=1)
             correct += (pred == y).sum().item()
             total += y.size(0)
 
