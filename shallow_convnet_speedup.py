@@ -14,9 +14,11 @@ class ShallowConvNetSpeedup(torch.nn.Sequential):
         self.add_module("batch_norm", BatchNorm())
         self.add_module("square", Square())  # (B,40,1094,1)
 
-        self.add_module("mean_pool_speedup", MeanPoolSpeedup())  # (B*stride,40,68,1)
+        # self.add_module("mean_pool_speedup", MeanPoolSpeedup())  # (B*stride,40,68,1)
+        self.add_module("mean_pool", MeanPool())
+
         self.add_module("safe_log", SafeLog())
-        # self.add_module("dropout", Dropout())
+        self.add_module("dropout", Dropout())
 
         self.add_module("final_conv", FinalConv())  # (B*stride,4,42,1)
         self.add_module("final_squeeze", FinalSqueeze())
@@ -122,27 +124,45 @@ class FinalConv(torch.nn.Module):
                  n_filters_conv=40,
                  n_classes=4):
         super(FinalConv, self).__init__()
-        self.conv_final = torch.nn.Conv2d(n_filters_conv, n_classes, (final_conv_length, 1))
+        self.conv_final = torch.nn.Conv2d(n_filters_conv, n_classes, (final_conv_length, 1),dilation=(15,1))
 
     def forward(self, x):
         return self.conv_final(x)
 
 
+# class FinalSqueeze(torch.nn.Module):
+#     def forward(self, x):
+#         crop_num = 619  # 1118 - 500 + 1
+#         batch = x.shape[0] // 15
+#         mean_logits = []
+#         for batch_no in range(batch):
+#             crop_mean_pool_logits = []
+#             for i in range(crop_num):
+#                 index = i % 15
+#                 skip = i // 15
+#                 batch_index = batch_no * 15 + index
+#                 crop = x[batch_index, :, skip + 0: skip + 1, :]
+#                 crop = crop.squeeze(-1)
+#                 crop = crop.squeeze(-1)
+#                 crop_mean_pool_logits.append(crop)
+#             mean_logits.append(torch.stack(crop_mean_pool_logits, dim=0).mean(dim=0))
+#
+#         return torch.stack(mean_logits, dim=0)
+
+
+########
+class MeanPool(torch.nn.Module):
+    def __init__(self,
+                 pool_time_length=75,
+                 pool_time_stride=1):
+        super(MeanPool, self).__init__()
+        self.mean_pool = torch.nn.AvgPool2d(kernel_size=(pool_time_length, 1), stride=(pool_time_stride, 1))
+
+    def forward(self, x):
+        return self.mean_pool(x)
+
 class FinalSqueeze(torch.nn.Module):
     def forward(self, x):
-        crop_num = 619  # 1118 - 500 + 1
-        batch = x.shape[0] // 15
-        mean_logits = []
-        for batch_no in range(batch):
-            crop_mean_pool_logits = []
-            for i in range(crop_num):
-                index = i % 15
-                skip = i // 15
-                batch_index = batch_no * 15 + index
-                crop = x[batch_index, :, skip + 0: skip + 1, :]
-                crop = crop.squeeze(-1)
-                crop = crop.squeeze(-1)
-                crop_mean_pool_logits.append(crop)
-            mean_logits.append(torch.stack(crop_mean_pool_logits, dim=0).mean(dim=0))
-
-        return torch.stack(mean_logits, dim=0)
+        x = x.squeeze(-1)
+        x = x.mean(dim=2).squeeze(-1)
+        return x
