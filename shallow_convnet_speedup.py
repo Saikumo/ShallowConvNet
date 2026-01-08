@@ -16,7 +16,7 @@ class ShallowConvNetSpeedup(torch.nn.Sequential):
 
         self.add_module("mean_pool_speedup", MeanPoolSpeedup())  # (B*stride,40,68,1)
         self.add_module("safe_log", SafeLog())
-        self.add_module("dropout", Dropout())
+        # self.add_module("dropout", Dropout())
 
         self.add_module("final_conv", FinalConv())  # (B*stride,4,42,1)
         self.add_module("final_squeeze", FinalSqueeze())
