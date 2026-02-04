@@ -95,11 +95,7 @@ class MeanPoolSpeedup(torch.nn.Module):
 
     # each fragment must have same shape
     def forward(self, x):
-        fragments = []
-        for offset in range(self.stride):
-            frag = x[:, :, offset:, :]
-            fragments.append(self.mean_pool(frag))
-        return torch.cat(fragments, 0)
+        return self.mean_pool(x)
 
 
 class SafeLog(torch.nn.Module):
