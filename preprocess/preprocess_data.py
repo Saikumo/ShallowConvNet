@@ -22,7 +22,6 @@ def preprocess_bnci2014_001(subject_id):
 
 def preprocess_kfold_bnci2014_001(subject_id, n_splits=5, random_state=common.random_seed):
     X, y = load_bnci2014_001_data_from_moabb(subject_id, train=True)
-    X = X[:,:,:1118]
 
     folds = []
 
