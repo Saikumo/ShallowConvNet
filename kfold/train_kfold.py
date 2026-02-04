@@ -17,7 +17,6 @@ def train_kfold(device, subjectId=1, patience=20, epochs=100, batch_size=64):
     best_losses_kappas = []
 
     for i, fold in enumerate(folds):
-        if i != 0: continue
         X_train = fold['X_train']
         y_train = fold['y_train']
         X_val = fold['X_val']
