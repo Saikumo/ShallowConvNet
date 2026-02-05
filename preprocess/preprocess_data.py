@@ -38,10 +38,6 @@ def preprocess_kfold_bnci2014_001(subject_id, n_splits=5, random_state=common.ra
         X_train = (X_train - mean) / (std + 1e-9)
         X_val = (X_val - mean) / (std + 1e-9)
 
-        # V to uV
-        X_train = X_train * 1e6
-        X_val = X_val * 1e6
-
         folds.append({
             "X_train": X_train,
             "y_train": y_train,
@@ -66,6 +62,7 @@ def load_bnci2014_001_data_from_moabb(subject_id, train, fmin=0, fmax=38, tmin=-
     X_all, labels_all, metadata = paradigm.get_data(dataset=dataset, subjects=[subject_id])
     session = '0train' if train else '1test'
     X = X_all[metadata['session'] == session]
+    X = X * 1e6 # unit V to uV
     labels = labels_all[metadata['session'] == session]
     y = [get_bnci2014_001_event_id()[label] for label in labels]
     return torch.tensor(X, dtype=torch.float32), torch.tensor(y, dtype=torch.long)
