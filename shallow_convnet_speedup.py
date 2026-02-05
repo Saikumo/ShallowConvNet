@@ -127,5 +127,5 @@ class FinalConv(torch.nn.Module):
 class FinalSqueeze(torch.nn.Module):
     def forward(self, x):
         x = x.squeeze(-1)
-        x = x.mean(dim=2).squeeze(-1)
+        x = x.mean(dim=2)
         return x

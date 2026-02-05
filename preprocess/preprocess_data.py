@@ -38,6 +38,10 @@ def preprocess_kfold_bnci2014_001(subject_id, n_splits=5, random_state=common.ra
         X_train = (X_train - mean) / (std + 1e-9)
         X_val = (X_val - mean) / (std + 1e-9)
 
+        # V to uV
+        X_train = X_train * 1e6
+        X_val = X_val * 1e6
+
         folds.append({
             "X_train": X_train,
             "y_train": y_train,
