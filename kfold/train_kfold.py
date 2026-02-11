@@ -32,11 +32,10 @@ def train_kfold(device, subjectId=1, patience=20, epochs=500, batch_size=64):
         model.to(device)
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.AdamW(model.parameters(), lr=0.0625 * 0.01, eps=1e-8, weight_decay=0)
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
             optimizer,
-            T_0=20,  # 20 epoch 一个周期
-            T_mult=1,  # 不扩大周期
-            eta_min=1e-6  # 最小学习率
+            T_max=80,  # 设为你大概会训练的长度
+            eta_min=1e-5
         )
 
         best_loss = float("inf")
@@ -49,9 +48,9 @@ def train_kfold(device, subjectId=1, patience=20, epochs=500, batch_size=64):
             train_loss, train_acc, train_kappa = train_one_epoch(model, train_loader, optimizer,scheduler, criterion, device)
             val_loss, val_acc, val_kappa = eval_one_epoch(model, val_loader, criterion, device)
 
-            # print(f"Fold {i + 1}, Epoch {epoch + 1}/{epochs} | "
-            #       f"Train Loss: {train_loss:.4f} Acc: {train_acc:.3f} | "
-            #       f"Val Loss: {val_loss:.4f} Acc: {val_acc:.3f}")
+            print(f"Fold {i + 1}, Epoch {epoch + 1}/{epochs} | "
+                  f"Train Loss: {train_loss:.4f} Acc: {train_acc:.4f} Train Kappa: {train_kappa:.4f} | "
+                  f"Val Loss: {val_loss:.4f} Acc: {val_acc:.4f} Val Kappa: {val_kappa:.4f}")
 
             if val_loss < best_loss - 1e-4:
                 best_loss = val_loss
@@ -59,9 +58,7 @@ def train_kfold(device, subjectId=1, patience=20, epochs=500, batch_size=64):
                 best_loss_acc = val_acc
                 counter = 0
                 best_loss_kappa = val_kappa
-                print(f"Fold {i + 1}, Epoch {epoch + 1}/{epochs} | "
-                      f"Train Loss: {train_loss:.4f} Acc: {train_acc:.4f} Train Kappa: {train_kappa:.4f} | "
-                      f"Val Loss: {val_loss:.4f} Acc: {val_acc:.4f} Val Kappa: {val_kappa:.4f}")
+
             else:
                 counter += 1
 
