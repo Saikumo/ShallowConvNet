@@ -8,12 +8,14 @@ from naive_implement import shallow_convnet
 from naive_implement.train_one_epoch import train_one_epoch, eval_one_epoch
 
 
-def train(device, epochs=51, batch_size=64, lr=0.0625 * 0.01):
+def train(device, batch_size=64, lr=0.0625 * 0.01):
     losses = []
     accs = []
     kappas = []
+    kfold_epochs = [40, 39, 69, 55, 56, 36, 101, 53, 41]
 
     for i in range(9):
+        epochs = kfold_epochs[i]
         X_train, y_train, X_test, y_test = preprocess_bnci2014_001(i + 1)
         train_dataset = EEGDataset(X_train, y_train)
         test_dataset = EEGDataset(X_test, y_test)
@@ -25,7 +27,12 @@ def train(device, epochs=51, batch_size=64, lr=0.0625 * 0.01):
         model = shallow_convnet.ShallowConvNet(X_train.shape)
         model.to(device)
         criterion = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+        optimizer = torch.optim.AdamW(model.parameters(), lr=0.0625 * 0.01, eps=1e-8, weight_decay=0)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer,
+            T_max=100,  # 设为你大概会训练的长度
+            eta_min=2e-5
+        )
 
         for epoch in range(epochs):
             train_loss, train_acc, train_kappa = train_one_epoch(model, train_loader, optimizer, criterion, device)
@@ -52,4 +59,3 @@ def train(device, epochs=51, batch_size=64, lr=0.0625 * 0.01):
     print(f"Test Loss: {mean_loss:.4f} ± {std_loss:.4f}")
     print(f"Accuracy: {mean_acc:.4f} ± {std_acc:.4f}")
     print(f"Kappa: {mean_kappa:.4f} ± {std_kappa:.4f}")
-
