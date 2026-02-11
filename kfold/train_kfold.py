@@ -31,7 +31,13 @@ def train_kfold(device, subjectId=1, patience=20, epochs=500, batch_size=64):
         model = ShallowConvNetSpeedup()
         model.to(device)
         criterion = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(model.parameters(), lr=0.0625 * 0.01, eps=1e-8)
+        optimizer = torch.optim.AdamW(model.parameters(), lr=0.0625 * 0.01, eps=1e-8, weight_decay=0)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
+            optimizer,
+            T_0=20,  # 20 epoch 一个周期
+            T_mult=1,  # 不扩大周期
+            eta_min=1e-6  # 最小学习率
+        )
 
         best_loss = float("inf")
         best_epoch = 0
@@ -40,7 +46,7 @@ def train_kfold(device, subjectId=1, patience=20, epochs=500, batch_size=64):
         best_loss_kappa = float("inf")
 
         for epoch in range(epochs):
-            train_loss, train_acc, train_kappa = train_one_epoch(model, train_loader, optimizer, criterion, device)
+            train_loss, train_acc, train_kappa = train_one_epoch(model, train_loader, optimizer,scheduler, criterion, device)
             val_loss, val_acc, val_kappa = eval_one_epoch(model, val_loader, criterion, device)
 
             # print(f"Fold {i + 1}, Epoch {epoch + 1}/{epochs} | "

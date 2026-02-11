@@ -3,7 +3,7 @@ from sklearn.metrics import cohen_kappa_score
 import torch.nn.functional as F
 
 
-def train_one_epoch(model, loader, optimizer, criterion, device):
+def train_one_epoch(model, loader, optimizer, scheduler, criterion, device):
     model.train()
     total_loss = 0
     correct = 0
@@ -29,6 +29,8 @@ def train_one_epoch(model, loader, optimizer, criterion, device):
 
         all_preds.append(pred.detach().cpu())
         all_labels.append(y.detach().cpu())
+
+    scheduler.step()
 
     all_preds = torch.cat(all_preds).flatten().numpy()
     all_labels = torch.cat(all_labels).flatten().numpy()
