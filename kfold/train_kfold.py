@@ -94,3 +94,4 @@ def train_all_kfold():
 
     median_epoch = int(np.median(best_epochs))
     print(f"Median Epoch for final training: {median_epoch}")
+    print(f"KFold Best Epochs: {best_epochs}")
