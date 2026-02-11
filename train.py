@@ -57,6 +57,9 @@ def train(device, batch_size=64, patience=20, epochs=500):
         best_loss_acc = float("inf")
         counter = 0
         best_loss_kappa = float("inf")
+        best_test_loss = float("inf")
+        best_test_acc = float("inf")
+        best_test_kappa = float("inf")
 
         for epoch in range(epochs):
             train_loss, train_acc, train_kappa = train_one_epoch(model, train_loader, optimizer, scheduler, criterion,
@@ -73,6 +76,13 @@ def train(device, batch_size=64, patience=20, epochs=500):
                 best_loss_acc = val_acc
                 counter = 0
                 best_loss_kappa = val_kappa
+                test_loss, test_acc, test_kappa = eval_one_epoch(model, test_loader, criterion, device)
+                best_test_loss = test_loss
+                best_test_acc = test_acc
+                best_test_kappa = test_kappa
+
+                print(f"Subject{i + 1}, Epoch {epoch + 1}/{epochs} | "
+                      f"Test Loss: {test_loss:.4f} Acc: {test_acc:.3f} Test Kappa: {test_kappa:.3f}")
             else:
                 counter += 1
 
@@ -82,14 +92,14 @@ def train(device, batch_size=64, patience=20, epochs=500):
                 best_losses.append(best_loss)
                 best_loss_accs.append(best_loss_acc)
                 best_losses_kappas.append(best_loss_kappa)
+
+                losses.append(best_test_loss)
+                accs.append(best_test_acc)
+                kappas.append(best_test_kappa)
                 break
 
-        test_loss, test_acc, test_kappa = eval_one_epoch(model, test_loader, criterion, device)
-        losses.append(test_loss)
-        accs.append(test_acc)
-        kappas.append(test_kappa)
-        print(f"Subject {i + 1}, Epoch {epoch + 1}/{epochs} | "
-              f"Test Loss: {test_loss:.4f} Acc: {test_acc:.3f} Test Kappa: {test_kappa:.3f}")
+
+
 
     # 计算均值和标准差（loss 和 accuracy）
     mean_loss = np.mean(losses)
