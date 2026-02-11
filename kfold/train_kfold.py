@@ -81,6 +81,7 @@ def train_kfold(device, subjectId=1, patience=20, epochs=500, batch_size=64):
     print(f"Validation Loss: {mean_loss:.4f} ± {std_loss:.4f}")
     print(f"Accuracy at Best Loss: {mean_acc:.4f} ± {std_acc:.4f}")
     print(f"Kappa at Best Loss: {mean_kappa:.4f} ± {std_kappa:.4f}")
+    print(f"Best Epochs: {best_epochs}")
     return median_epoch
 
 
