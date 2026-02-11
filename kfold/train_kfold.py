@@ -34,8 +34,8 @@ def train_kfold(device, subjectId=1, patience=20, epochs=500, batch_size=64):
         optimizer = torch.optim.AdamW(model.parameters(), lr=0.0625 * 0.01, eps=1e-8, weight_decay=0)
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
             optimizer,
-            T_max=80,  # 设为你大概会训练的长度
-            eta_min=1e-5
+            T_max=100,  # 设为你大概会训练的长度
+            eta_min=2e-5
         )
 
         best_loss = float("inf")
