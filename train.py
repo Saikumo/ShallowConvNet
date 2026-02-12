@@ -45,13 +45,7 @@ def train(device, batch_size=64, patience=20, epochs=500):
         model = ShallowConvNetSpeedup()
         model.to(device)
         criterion = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.AdamW(model.parameters(), lr=0.0625 * 0.01, eps=1e-8, weight_decay=0)
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
-            optimizer,
-            T_0=50,  # 第一次周期长度
-            T_mult=1,  # 每次周期是否变长（1=固定长度）
-            eta_min=2e-5  # 最小学习率
-        )
+        optimizer = torch.optim.AdamW(model.parameters(), lr=0.1 * 0.01, eps=1e-8, weight_decay=0)
 
         best_loss = float("inf")
         best_epoch = 0
@@ -63,7 +57,7 @@ def train(device, batch_size=64, patience=20, epochs=500):
         best_test_kappa = float("inf")
 
         for epoch in range(epochs):
-            train_loss, train_acc, train_kappa = train_one_epoch(model, train_loader, optimizer, scheduler, criterion,
+            train_loss, train_acc, train_kappa = train_one_epoch(model, train_loader, optimizer, None, criterion,
                                                                  device)
             val_loss, val_acc, val_kappa = eval_one_epoch(model, val_loader, criterion, device)
 
