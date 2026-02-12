@@ -45,6 +45,7 @@ def train_kfold(device, subjectId=1, patience=20, epochs=500, batch_size=64, ):
         counter = 0
         best_loss_kappa = float("inf")
 
+        wandb.login()
         # Start a new wandb run to track this script.
         run = wandb.init(
             # Set the wandb entity where your project will be logged (generally your team name).
