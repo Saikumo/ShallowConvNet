@@ -82,6 +82,8 @@ def train_kfold(device, subjectId=1, patience=20, epochs=500, batch_size=64, ):
                 best_losses_kappas.append(best_loss_kappa)
                 break
 
+        run.finish()
+
     # 取 epoch 的中位数作为最终训练 epoch
     median_epoch = int(np.median(best_epochs))
     # 计算均值和标准差（loss 和 accuracy）
@@ -105,7 +107,6 @@ def train_all_kfold():
     import os
 
     wandb.login(key=os.environ["WANDB_API_KEY"])
-    print(os.environ["WANDB_API_KEY"])
 
     best_epochs = []
 
