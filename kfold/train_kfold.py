@@ -101,6 +101,12 @@ def train_kfold(device, subjectId=1, patience=20, epochs=500, batch_size=64, ):
 
 
 def train_all_kfold():
+    import wandb
+    import os
+
+    wandb.login(key=os.environ["WANDB_API_KEY"])
+    print(os.environ["WANDB_API_KEY"])
+
     best_epochs = []
 
     for i in range(9):
