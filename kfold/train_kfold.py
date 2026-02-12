@@ -4,9 +4,10 @@ from shallow_convnet_speedup import ShallowConvNetSpeedup
 from train_one_epoch import *
 import numpy as np
 from torch.utils.data import DataLoader
+import wandb
 
 
-def train_kfold(device, subjectId=1, patience=20, epochs=500, batch_size=64):
+def train_kfold(device, subjectId=1, patience=20, epochs=500, batch_size=64, ):
     folds = preprocess_kfold_bnci2014_001(subject_id=subjectId, n_splits=5)
 
     print(f"device {device},subject {subjectId}")
@@ -44,13 +45,24 @@ def train_kfold(device, subjectId=1, patience=20, epochs=500, batch_size=64):
         counter = 0
         best_loss_kappa = float("inf")
 
+        # Start a new wandb run to track this script.
+        run = wandb.init(
+            # Set the wandb entity where your project will be logged (generally your team name).
+            entity="saikumo11-saikumo-s",
+            # Set the wandb project where this run will be logged.
+            project="ShallowConvNet",
+            config={"subjectId": subjectId,
+                    "fold": i + 1,
+                    "kfold": True}
+        )
+
         for epoch in range(epochs):
-            train_loss, train_acc, train_kappa = train_one_epoch(model, train_loader, optimizer,scheduler, criterion, device)
+            train_loss, train_acc, train_kappa = train_one_epoch(model, train_loader, optimizer, scheduler, criterion,
+                                                                 device)
             val_loss, val_acc, val_kappa = eval_one_epoch(model, val_loader, criterion, device)
 
-            print(f"Fold {i + 1}, Epoch {epoch + 1}/{epochs} | "
-                  f"Train Loss: {train_loss:.4f} Acc: {train_acc:.4f} Train Kappa: {train_kappa:.4f} | "
-                  f"Val Loss: {val_loss:.4f} Acc: {val_acc:.4f} Val Kappa: {val_kappa:.4f}")
+            run.log({"train_loss": train_loss, "train_acc": train_acc, "train_kappa": train_kappa,
+                     "val_loss": val_loss, "val_acc": val_acc, "val_kappa": val_kappa})
 
             if val_loss < best_loss - 1e-4:
                 best_loss = val_loss
