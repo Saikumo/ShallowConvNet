@@ -30,7 +30,8 @@ def train_one_epoch(model, loader, optimizer, scheduler, criterion, device):
         all_preds.append(pred.detach().cpu())
         all_labels.append(y.detach().cpu())
 
-    scheduler.step()
+    if scheduler is not None:
+        scheduler.step()
 
     all_preds = torch.cat(all_preds).flatten().numpy()
     all_labels = torch.cat(all_labels).flatten().numpy()
