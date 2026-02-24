@@ -18,14 +18,6 @@ def train_kfold(config):
     best_loss_accs = []
     best_losses_kappas = []
 
-    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    summary_run = wandb.init(
-        entity="saikumo11-saikumo-s",
-        project="ShallowConvNet-KFold",
-        name=f"subject{config.subject_id}_summary_{timestamp}",
-        config=config,
-    )
-
     for i, fold in enumerate(folds):
         run = wandb.init(
             entity="saikumo11-saikumo-s",
@@ -85,6 +77,14 @@ def train_kfold(config):
     std_acc = np.std(best_loss_accs)
     mean_kappa = np.mean(best_losses_kappas)
     std_kappa = np.std(best_losses_kappas)
+
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    summary_run = wandb.init(
+        entity="saikumo11-saikumo-s",
+        project="ShallowConvNet-KFold",
+        name=f"subject{config.subject_id}_summary_{timestamp}",
+        config=config,
+    )
     summary_run.log({"mean_loss": mean_loss, "std_loss": std_loss, "mean_acc": mean_acc, "std_acc": std_acc,
                      "mean_kappa": mean_kappa, "std_kappa": std_kappa})
     summary_run.finish()
