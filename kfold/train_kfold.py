@@ -5,87 +5,68 @@ from train_one_epoch import *
 import numpy as np
 from torch.utils.data import DataLoader
 import wandb
+import os
+from dataclasses import dataclass
 
 
-def train_kfold(device, subjectId=1, patience=20, epochs=500, batch_size=64, ):
-    folds = preprocess_kfold_bnci2014_001(subject_id=subjectId, n_splits=5)
+def train_kfold(config):
+    folds = preprocess_kfold_bnci2014_001(subject_id=config.subject_id, n_splits=config.kfold_n_splits)
 
-    print(f"device {device},subject {subjectId}")
-
-    best_epochs = []
     best_losses = []
     best_loss_accs = []
     best_losses_kappas = []
 
+    run = wandb.init(
+        entity="saikumo11-saikumo-s",
+        project="ShallowConvNet-KFold",
+        config=config,
+    )
+
     for i, fold in enumerate(folds):
-        X_train = fold['X_train']
-        y_train = fold['y_train']
-        X_val = fold['X_val']
-        y_val = fold['y_val']
+        X_train, y_train, X_val, y_val = (fold[k] for k in ['X_train', 'y_train', 'X_val', 'y_val'])
+
         train_dataset = EEGDataset(X_train, y_train)
         val_dataset = EEGDataset(X_val, y_val)
-        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True,
-                                  pin_memory=(device.type == 'cuda'), num_workers=4, persistent_workers=True)
-        val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False,
-                                pin_memory=(device.type == 'cuda'), num_workers=4, persistent_workers=True)
+        train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True,
+                                  pin_memory=(config.device.type == 'cuda'), num_workers=4, persistent_workers=True)
+        val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False,
+                                pin_memory=(config.device.type == 'cuda'), num_workers=4, persistent_workers=True)
 
         model = ShallowConvNetSpeedup()
-        model.to(device)
+        model.to(config.device)
         criterion = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.AdamW(model.parameters(), lr=0.0625 * 0.01, eps=1e-8, weight_decay=0)
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
-            optimizer,
-            T_max=100,  # 设为你大概会训练的长度
-            eta_min=2e-5
-        )
+        optimizer = torch.optim.AdamW(model.parameters(), lr=config.lr, eps=config.adamw_eps,
+                                      weight_decay=config.weight_decay)
 
         best_loss = float("inf")
-        best_epoch = 0
         best_loss_acc = float("inf")
-        counter = 0
         best_loss_kappa = float("inf")
+        counter = 0
 
-        # Start a new wandb run to track this script.
-        run = wandb.init(
-            # Set the wandb entity where your project will be logged (generally your team name).
-            entity="saikumo11-saikumo-s",
-            # Set the wandb project where this run will be logged.
-            project="ShallowConvNet",
-            config={"subjectId": subjectId,
-                    "fold": i + 1,
-                    "kfold": True}
-        )
+        for epoch in range(config.epochs):
+            train_loss, train_acc, train_kappa = train_one_epoch(model, train_loader, optimizer, None, criterion,
+                                                                 config.device)
+            val_loss, val_acc, val_kappa = eval_one_epoch(model, val_loader, criterion, config.device)
 
-        for epoch in range(epochs):
-            train_loss, train_acc, train_kappa = train_one_epoch(model, train_loader, optimizer, scheduler, criterion,
-                                                                 device)
-            val_loss, val_acc, val_kappa = eval_one_epoch(model, val_loader, criterion, device)
-
-            run.log({"train_loss": train_loss, "train_acc": train_acc, "train_kappa": train_kappa,
-                     "val_loss": val_loss, "val_acc": val_acc, "val_kappa": val_kappa})
+            run.log({f"train_loss_fold{i}": train_loss, f"train_acc_fold{i}": train_acc,
+                     f"train_kappa_fold{i}": train_kappa, f"val_loss_fold{i}": val_loss, f"val_acc_fold{i}": val_acc,
+                     f"val_kappa_fold{i}": val_kappa}, step=epoch)
 
             if val_loss < best_loss - 1e-4:
                 best_loss = val_loss
-                best_epoch = epoch + 1
                 best_loss_acc = val_acc
-                counter = 0
                 best_loss_kappa = val_kappa
-
+                counter = 0
             else:
                 counter += 1
 
-            if counter >= patience:
+            if counter >= config.patience:
                 print("Early stopping")
-                best_epochs.append(best_epoch)
                 best_losses.append(best_loss)
                 best_loss_accs.append(best_loss_acc)
                 best_losses_kappas.append(best_loss_kappa)
                 break
 
-        run.finish()
-
-    # 取 epoch 的中位数作为最终训练 epoch
-    median_epoch = int(np.median(best_epochs))
     # 计算均值和标准差（loss 和 accuracy）
     mean_loss = np.mean(best_losses)
     std_loss = np.std(best_losses)
@@ -93,27 +74,37 @@ def train_kfold(device, subjectId=1, patience=20, epochs=500, batch_size=64, ):
     std_acc = np.std(best_loss_accs)
     mean_kappa = np.mean(best_losses_kappas)
     std_kappa = np.std(best_losses_kappas)
-    # 打印结果
-    print(f"Median Epoch for subject{subjectId}: {median_epoch}")
-    print(f"Validation Loss: {mean_loss:.4f} ± {std_loss:.4f}")
-    print(f"Accuracy at Best Loss: {mean_acc:.4f} ± {std_acc:.4f}")
-    print(f"Kappa at Best Loss: {mean_kappa:.4f} ± {std_kappa:.4f}")
-    print(f"Best Epochs: {best_epochs}")
-    return median_epoch
+    run.log({"mean_loss": mean_loss, "std_loss": std_loss, "mean_acc": mean_acc, "std_acc": std_acc,
+             "mean_kappa": mean_kappa, "std_kappa": std_kappa})
+    run.finish()
 
 
 def train_all_kfold():
-    import wandb
-    import os
-
     wandb.login(key=os.environ["WANDB_API_KEY"])
 
-    best_epochs = []
-
     for i in range(9):
-        epoch = train_kfold(subjectId=i + 1, device=torch.device("cuda"))
-        best_epochs.append(epoch)
+        config = Config(
+            subject_id=i + 1,
+            device=torch.device("cuda"),
+            patience=20,
+            epochs=500,
+            batch_size=64,
+            kfold_n_splits=5,
+            lr=0.0625 * 0.01,
+            adamw_eps=1e-8,
+            weight_decay=0,
+        )
+        train_kfold(config)
 
-    median_epoch = int(np.median(best_epochs))
-    print(f"Median Epoch for final training: {median_epoch}")
-    print(f"KFold Best Epochs: {best_epochs}")
+
+@dataclass
+class Config:
+    subject_id: int
+    device: torch.device
+    patience: int
+    epochs: int
+    batch_size: int
+    kfold_n_splits: int
+    lr: float
+    adamw_eps: float
+    weight_decay: float

@@ -2,7 +2,7 @@ import random
 import numpy as np
 import torch
 
-random_seed = 6
+random_seed = 42
 
 
 def set_seed(seed=random_seed):
