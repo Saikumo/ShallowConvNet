@@ -1,15 +1,29 @@
 from moabb.datasets import BNCI2014_001
 import torch
-import mne
 from moabb.paradigms import MotorImagery
 from sklearn.model_selection import KFold
 
 import common
 
 
+def preprocess_train_bnci2014_001(subject_id):
+    X_train, y_train, X_val, y_val = _load_splited_train_bnci2014_001_data(subject_id)
+
+    X_test, y_test = _load_bnci2014_001_data_from_moabb(subject_id=subject_id, train=False)
+
+    mean = X_train.mean(dim=(0, 2), keepdim=True)
+    std = X_train.std(dim=(0, 2), keepdim=True)
+
+    X_train = (X_train - mean) / (std + 1e-9)
+    X_val = (X_val - mean) / (std + 1e-9)
+    X_test = (X_test - mean) / (std + 1e-9)
+
+    return X_train, y_train, X_val, y_val, X_test, y_test
+
+
 def preprocess_bnci2014_001(subject_id):
-    X_train, y_train = load_bnci2014_001_data_from_moabb(subject_id=subject_id, train=True)
-    X_test, y_test = load_bnci2014_001_data_from_moabb(subject_id=subject_id, train=False)
+    X_train, y_train = _load_bnci2014_001_data_from_moabb(subject_id=subject_id, train=True)
+    X_test, y_test = _load_bnci2014_001_data_from_moabb(subject_id=subject_id, train=False)
 
     mean = X_train.mean(dim=(0, 2), keepdim=True)
     std = X_train.std(dim=(0, 2), keepdim=True)
@@ -21,7 +35,7 @@ def preprocess_bnci2014_001(subject_id):
 
 
 def preprocess_kfold_bnci2014_001(subject_id, n_splits=5, random_state=common.random_seed):
-    X, y = load_bnci2014_001_data_from_moabb(subject_id, train=True)
+    X, y = _load_bnci2014_001_data_from_moabb(subject_id, train=True)
 
     folds = []
 
@@ -48,7 +62,7 @@ def preprocess_kfold_bnci2014_001(subject_id, n_splits=5, random_state=common.ra
     return folds
 
 
-def get_bnci2014_001_event_id():
+def _get_bnci2014_001_event_id():
     event_id = BNCI2014_001().event_id
     # 将 event_id 的值映射到 0,1,2,3
     min_val = min(event_id.values())
@@ -56,13 +70,35 @@ def get_bnci2014_001_event_id():
     return event_id
 
 
-def load_bnci2014_001_data_from_moabb(subject_id, train, fmin=0, fmax=38, tmin=-0.5, tmax=4):
+def _load_bnci2014_001_data_from_moabb(subject_id, train, fmin=0, fmax=38, tmin=-0.5, tmax=4):
+    X_all, labels_all, metadata = _extract_bnci2014_001_data_from_moabb(subject_id, fmin, fmax, tmin, tmax)
+    session = '0train' if train else '1test'
+    X = X_all[metadata['session'] == session]
+    X = X * 1e6  # unit V to uV
+    labels = labels_all[metadata['session'] == session]
+    y = [_get_bnci2014_001_event_id()[label] for label in labels]
+    return torch.tensor(X, dtype=torch.float32), torch.tensor(y, dtype=torch.long)
+
+
+def _load_splited_train_bnci2014_001_data(subject_id, fmin=0, fmax=38, tmin=-0.5, tmax=4):
+    X_all, labels_all, metadata = _extract_bnci2014_001_data_from_moabb(subject_id, fmin, fmax, tmin, tmax)
+    session_mask = metadata['session'] == '0train'
+    X_0train_session = X_all[session_mask]
+    X_0train_session = X_0train_session * 1e6  # unit V to uV
+    labels_0train_session = labels_all[session_mask]
+    train_mask = metadata['run'] != 5
+    val_mask = metadata['run'] == 5
+    X_train, X_val, labels_train, labels_val = X_0train_session[train_mask], X_0train_session[val_mask], \
+        labels_0train_session[train_mask], labels_0train_session[val_mask]
+    y_train, y_val = [_get_bnci2014_001_event_id()[label] for label in labels_train], [
+        _get_bnci2014_001_event_id()[label]
+        for label in labels_val]
+    return (torch.tensor(X_train, dtype=torch.float32), torch.tensor(y_train, dtype=torch.long),
+            torch.tensor(X_val, dtype=torch.float32), torch.tensor(y_val, dtype=torch.long))
+
+
+def _extract_bnci2014_001_data_from_moabb(subject_id, fmin, fmax, tmin, tmax):
     dataset = BNCI2014_001()
     paradigm = MotorImagery(n_classes=4, fmin=fmin, fmax=fmax, tmin=tmin, tmax=tmax)
     X_all, labels_all, metadata = paradigm.get_data(dataset=dataset, subjects=[subject_id])
-    session = '0train' if train else '1test'
-    X = X_all[metadata['session'] == session]
-    X = X * 1e6 # unit V to uV
-    labels = labels_all[metadata['session'] == session]
-    y = [get_bnci2014_001_event_id()[label] for label in labels]
-    return torch.tensor(X, dtype=torch.float32), torch.tensor(y, dtype=torch.long)
+    return X_all, labels_all, metadata

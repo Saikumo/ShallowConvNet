@@ -1,3 +1,4 @@
+from common import Config
 from eeg_dataset import EEGDataset
 from preprocess.preprocess_data import *
 from shallow_convnet_speedup import ShallowConvNetSpeedup
@@ -106,16 +107,3 @@ def train_all_kfold():
             weight_decay=0,
         )
         train_kfold(config)
-
-
-@dataclass
-class Config:
-    subject_id: int
-    device: torch.device
-    patience: int
-    epochs: int
-    batch_size: int
-    kfold_n_splits: int
-    lr: float
-    adamw_eps: float
-    weight_decay: float
