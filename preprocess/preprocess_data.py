@@ -83,8 +83,8 @@ def _load_bnci2014_001_data_from_moabb(subject_id, train, fmin=0, fmax=38, tmin=
 def _load_splited_train_bnci2014_001_data(subject_id, fmin=0, fmax=38, tmin=-0.5, tmax=4):
     X_all, labels_all, metadata = _extract_bnci2014_001_data_from_moabb(subject_id, fmin, fmax, tmin, tmax)
     session_mask = metadata['session'] == '0train'
-    train_mask = metadata['run'] != 5 and session_mask
-    val_mask = metadata['run'] == 5 and session_mask
+    train_mask = (metadata['run'] != '5') & session_mask
+    val_mask = (metadata['run'] == '5') & session_mask
 
     X_train, X_val, labels_train, labels_val = X_all[train_mask], X_all[val_mask], \
         labels_all[train_mask], labels_all[val_mask]
