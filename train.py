@@ -27,8 +27,8 @@ def train(device):
         lr=0.0625 * 0.01,
         adamw_eps=1e-8,
         weight_decay=0,
-        fmin=12,
-        fmax=18,
+        fmin=0,
+        fmax=100,
     )
 
     for i in range(9):
