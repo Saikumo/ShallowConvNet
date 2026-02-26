@@ -108,4 +108,5 @@ def _extract_bnci2014_001_data_from_moabb(subject_id, fmin, fmax, tmin, tmax):
     mask = var < np.percentile(var, 95)
     X_all = X_all[mask]
     labels_all = labels_all[mask]
+    metadata = metadata[mask]
     return X_all, labels_all, metadata
