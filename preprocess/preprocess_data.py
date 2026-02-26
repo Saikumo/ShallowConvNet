@@ -1,3 +1,4 @@
+import numpy as np
 from moabb.datasets import BNCI2014_001
 import torch
 from moabb.paradigms import MotorImagery
@@ -101,4 +102,10 @@ def _extract_bnci2014_001_data_from_moabb(subject_id, fmin, fmax, tmin, tmax):
     dataset = BNCI2014_001()
     paradigm = MotorImagery(n_classes=4, fmin=fmin, fmax=fmax, tmin=tmin, tmax=tmax)
     X_all, labels_all, metadata = paradigm.get_data(dataset=dataset, subjects=[subject_id])
+
+    #TODO try remove bad trial
+    var = X_all.var(axis=(1, 2))
+    mask = var < np.percentile(var, 95)
+    X_all = X_all[mask]
+    labels_all = labels_all[mask]
     return X_all, labels_all, metadata
