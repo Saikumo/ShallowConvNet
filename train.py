@@ -81,10 +81,7 @@ def train(device):
             run.log(
                 {"train_loss_": train_loss, "train_acc_": train_acc, "train_kappa_": train_kappa, "val_loss_": val_loss,
                  "val_acc_": val_acc, "val_kappa_": val_kappa, "test_loss": test_loss, "test_acc": test_acc,
-                 "test_kappa": test_kappa, "confusion_matrix": wandb.plot.confusion_matrix(
-                    preds=test_preds,
-                    y_true=test_labels
-                )})
+                 "test_kappa": test_kappa}, step=epoch + 1)
 
             if val_loss < best_loss - 1e-4:
                 best_loss = val_loss
@@ -93,6 +90,11 @@ def train(device):
                 best_test_loss = test_loss
                 best_test_acc = test_acc
                 best_test_kappa = test_kappa
+                run.log(
+                    {"confusion_matrix": wandb.plot.confusion_matrix(
+                        preds=test_preds,
+                        y_true=test_labels
+                    )}, step=epoch + 1)
 
             else:
                 counter += 1
