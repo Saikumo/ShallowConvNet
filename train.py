@@ -74,13 +74,17 @@ def train(device):
             train_loss, train_acc, train_kappa = train_one_epoch(model, train_loader, optimizer, None, criterion,
                                                                  device)
             val_loss, val_acc, val_kappa = eval_one_epoch(model, val_loader, criterion, device)
-            test_loss, test_acc, test_kappa = eval_one_epoch(model, test_loader, criterion, device)
+            test_loss, test_acc, test_kappa, test_preds, test_labels = eval_one_epoch(model, test_loader, criterion,
+                                                                                      device)
             scheduler.step(val_loss)
 
             run.log(
                 {"train_loss_": train_loss, "train_acc_": train_acc, "train_kappa_": train_kappa, "val_loss_": val_loss,
                  "val_acc_": val_acc, "val_kappa_": val_kappa, "test_loss": test_loss, "test_acc": test_acc,
-                 "test_kappa": test_kappa})
+                 "test_kappa": test_kappa, "confusion_matrix": wandb.plot.confusion_matrix(
+                    preds=test_preds,
+                    y_true=test_labels
+                )})
 
             if val_loss < best_loss - 1e-4:
                 best_loss = val_loss
