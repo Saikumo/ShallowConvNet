@@ -19,6 +19,8 @@ class Config:
     lr: Optional[float] = None
     adamw_eps: Optional[float] = None
     weight_decay: Optional[float] = None
+    fmin: Optional[int] = None
+    fmax: Optional[int] = None
 
 
 def set_seed(seed=random_seed):
