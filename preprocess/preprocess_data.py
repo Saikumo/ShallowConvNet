@@ -7,8 +7,8 @@ from sklearn.model_selection import KFold
 import common
 
 
-def preprocess_train_bnci2014_001(subject_id):
-    X_train, y_train, X_val, y_val = _load_splited_train_bnci2014_001_data(subject_id)
+def preprocess_train_bnci2014_001(subject_id, fmin, fmax):
+    X_train, y_train, X_val, y_val = _load_splited_train_bnci2014_001_data(subject_id, fmin, fmax)
 
     X_test, y_test = _load_bnci2014_001_data_from_moabb(subject_id=subject_id, train=False)
 
@@ -103,7 +103,7 @@ def _extract_bnci2014_001_data_from_moabb(subject_id, fmin, fmax, tmin, tmax):
     paradigm = MotorImagery(n_classes=4, fmin=fmin, fmax=fmax, tmin=tmin, tmax=tmax)
     X_all, labels_all, metadata = paradigm.get_data(dataset=dataset, subjects=[subject_id])
 
-    #TODO try remove bad trial
+    # TODO try remove bad trial
     var = X_all.var(axis=(1, 2))
     mask = var < np.percentile(var, 95)
     X_all = X_all[mask]

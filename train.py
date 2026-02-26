@@ -27,12 +27,14 @@ def train(device):
         lr=0.0625 * 0.01,
         adamw_eps=1e-8,
         weight_decay=0,
+        fmin=12,
+        fmax=18,
     )
 
     for i in range(9):
         config.subject_id = i + 1
 
-        X_train, y_train, X_val, y_val, X_test, y_test = preprocess_train_bnci2014_001(i + 1)
+        X_train, y_train, X_val, y_val, X_test, y_test = preprocess_train_bnci2014_001(i + 1, config.fmin, config.fmax)
 
         train_dataset, val_dataset, test_dataset = EEGDataset(X_train, y_train), EEGDataset(X_val, y_val), EEGDataset(
             X_test, y_test)
