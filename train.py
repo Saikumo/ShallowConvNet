@@ -22,7 +22,7 @@ def train(device):
         device=torch.device("cuda"),
         patience=20,
         epochs=500,
-        batch_size=64,
+        batch_size=32,
         kfold_n_splits=5,
         lr=0.0625 * 0.01,
         adamw_eps=1e-8,
