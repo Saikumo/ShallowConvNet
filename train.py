@@ -73,7 +73,7 @@ def train(device):
         for epoch in range(config.epochs):
             train_loss, train_acc, train_kappa = train_one_epoch(model, train_loader, optimizer, None, criterion,
                                                                  device)
-            val_loss, val_acc, val_kappa = eval_one_epoch(model, val_loader, criterion, device)
+            val_loss, val_acc, val_kappa, _, _ = eval_one_epoch(model, val_loader, criterion, device)
             test_loss, test_acc, test_kappa, test_preds, test_labels = eval_one_epoch(model, test_loader, criterion,
                                                                                       device)
             scheduler.step(val_loss)
