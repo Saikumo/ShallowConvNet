@@ -20,7 +20,7 @@ def train(device):
 
     config = common.Config(
         device=torch.device("cuda"),
-        patience=50,
+        patience=20,
         epochs=500,
         batch_size=64,
         lr=0.0625 * 0.01,
