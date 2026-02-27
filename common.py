@@ -22,6 +22,7 @@ class Config:
     fmin: Optional[int] = None
     fmax: Optional[int] = None
     remove_bad_trial: Optional[bool] = None
+    scheduler: Optional[str] = None
 
 
 def set_seed(seed=random_seed):

@@ -28,7 +28,9 @@ def train(device):
         weight_decay=0,
         fmin=0,
         fmax=38,
-        remove_bad_trial=False
+        remove_bad_trial=False,
+        scheduler="NoScheduler"
+
     )
 
     for i in range(9):
@@ -62,14 +64,16 @@ def train(device):
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.AdamW(model.parameters(), lr=config.lr, eps=config.adamw_eps,
                                       weight_decay=config.weight_decay)
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer,
-            mode="min",
-            factor=0.5,  # lr *= 0.5
-            patience=5,  # 5 epoch 不下降就降
-            min_lr=1e-5,
-            verbose=True
-        )
+        scheduler = None
+        if config.scheduler == "ReduceLROnPlateau":
+            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+                optimizer,
+                mode="min",
+                factor=0.5,  # lr *= 0.5
+                patience=5,  # 5 epoch 不下降就降
+                min_lr=1e-5,
+                verbose=True
+            )
 
         best_loss = float("inf")
         counter = 0
@@ -89,7 +93,8 @@ def train(device):
             val_loss, val_acc, val_kappa, _, _ = eval_one_epoch(model, val_loader, criterion, device)
             test_loss, test_acc, test_kappa, test_preds, test_labels = eval_one_epoch(model, test_loader, criterion,
                                                                                       device)
-            scheduler.step(val_loss)
+            if config.scheduler == "ReduceLROnPlateau":
+                scheduler.step(val_loss)
 
             run.log(
                 {"train_loss_": train_loss, "train_acc_": train_acc, "train_kappa_": train_kappa, "val_loss_": val_loss,
