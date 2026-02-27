@@ -72,7 +72,8 @@ def _get_bnci2014_001_event_id():
 
 
 def _load_bnci2014_001_data_from_moabb(subject_id, train, fmin=0, fmax=38, tmin=-0.5, tmax=4):
-    X_all, labels_all, metadata = _extract_bnci2014_001_data_from_moabb(subject_id, fmin, fmax, tmin, tmax)
+    X_all, labels_all, metadata = _extract_bnci2014_001_data_from_moabb(subject_id, fmin, fmax, tmin, tmax,
+                                                                        remove_bad_trial=False)
     session = '0train' if train else '1test'
     X = X_all[metadata['session'] == session]
     X = X * 1e6  # unit V to uV
