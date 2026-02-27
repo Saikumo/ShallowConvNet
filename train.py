@@ -34,12 +34,15 @@ def train(device):
     for i in range(9):
         # different subject different config
         config.subject_id = i + 1
-        config.remove_bad_trial = False
         config.fmax = 38
+        config.epochs = 20
         if config.subject_id == 2:
             config.fmax = 100
+        elif config.subject_id == 4:
+            config.epochs = 50
         elif config.subject_id == 5:
-            config.remove_bad_trial = True
+            config.epochs = 50
+            config.fmax = 100
 
         X_train, y_train, X_val, y_val, X_test, y_test = preprocess_train_bnci2014_001(i + 1, config.fmin, config.fmax,
                                                                                        config.remove_bad_trial)
