@@ -7,8 +7,8 @@ from sklearn.model_selection import KFold
 import common
 
 
-def preprocess_train_bnci2014_001(subject_id, fmin, fmax):
-    X_train, y_train, X_val, y_val = _load_splited_train_bnci2014_001_data(subject_id, fmin, fmax)
+def preprocess_train_bnci2014_001(subject_id, fmin, fmax, remove_bad_trial):
+    X_train, y_train, X_val, y_val = _load_splited_train_bnci2014_001_data(subject_id, fmin, fmax, remove_bad_trial)
 
     X_test, y_test = _load_bnci2014_001_data_from_moabb(subject_id=subject_id, train=False)
 
@@ -81,8 +81,9 @@ def _load_bnci2014_001_data_from_moabb(subject_id, train, fmin=0, fmax=38, tmin=
     return torch.tensor(X, dtype=torch.float32), torch.tensor(y, dtype=torch.long)
 
 
-def _load_splited_train_bnci2014_001_data(subject_id, fmin=0, fmax=38, tmin=-0.5, tmax=4):
-    X_all, labels_all, metadata = _extract_bnci2014_001_data_from_moabb(subject_id, fmin, fmax, tmin, tmax)
+def _load_splited_train_bnci2014_001_data(subject_id, fmin=0, fmax=38, tmin=-0.5, tmax=4, remove_bad_trial=False):
+    X_all, labels_all, metadata = _extract_bnci2014_001_data_from_moabb(subject_id, fmin, fmax, tmin, tmax,
+                                                                        remove_bad_trial)
     session_mask = metadata['session'] == '0train'
     train_mask = (metadata['run'] != '5') & session_mask
     val_mask = (metadata['run'] == '5') & session_mask
@@ -98,8 +99,15 @@ def _load_splited_train_bnci2014_001_data(subject_id, fmin=0, fmax=38, tmin=-0.5
             torch.tensor(X_val, dtype=torch.float32), torch.tensor(y_val, dtype=torch.long))
 
 
-def _extract_bnci2014_001_data_from_moabb(subject_id, fmin, fmax, tmin, tmax):
+def _extract_bnci2014_001_data_from_moabb(subject_id, fmin, fmax, tmin, tmax, remove_bad_trial):
     dataset = BNCI2014_001()
     paradigm = MotorImagery(n_classes=4, fmin=fmin, fmax=fmax, tmin=tmin, tmax=tmax)
     X_all, labels_all, metadata = paradigm.get_data(dataset=dataset, subjects=[subject_id])
+    if remove_bad_trial:
+        # try remove bad trial
+        var = X_all.var(axis=(1, 2))
+        mask = var < np.percentile(var, 95)
+        X_all = X_all[mask]
+        labels_all = labels_all[mask]
+        metadata = metadata[mask]
     return X_all, labels_all, metadata

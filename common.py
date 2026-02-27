@@ -21,6 +21,7 @@ class Config:
     weight_decay: Optional[float] = None
     fmin: Optional[int] = None
     fmax: Optional[int] = None
+    remove_bad_trial: Optional[bool] = None
 
 
 def set_seed(seed=random_seed):

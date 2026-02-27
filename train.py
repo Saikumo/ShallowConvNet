@@ -20,19 +20,26 @@ def train(device):
 
     config = common.Config(
         device=torch.device("cuda"),
-        patience=20,
+        patience=50,
         epochs=500,
         batch_size=64,
-        kfold_n_splits=5,
         lr=0.0625 * 0.01,
         adamw_eps=1e-8,
         weight_decay=0,
-        fmin=4,
-        fmax=100,
+        fmin=0,
+        fmax=38,
+        remove_bad_trial=False
     )
 
     for i in range(9):
+        # different subject different config
         config.subject_id = i + 1
+        config.remove_bad_trial = False
+        config.fmax = 38
+        if config.subject_id == 2:
+            config.fmax = 100
+        elif config.subject_id == 5:
+            config.remove_bad_trial = True
 
         X_train, y_train, X_val, y_val, X_test, y_test = preprocess_train_bnci2014_001(i + 1, config.fmin, config.fmax)
 
@@ -106,6 +113,9 @@ def train(device):
                 losses.append(best_test_loss)
                 accs.append(best_test_acc)
                 kappas.append(best_test_kappa)
+                run.log(
+                    {"best_test_loss": best_test_loss, "best_test_acc": best_test_acc,
+                     "best_test_kappa": best_test_kappa})
                 break
         run.finish()
 
