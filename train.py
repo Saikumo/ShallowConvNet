@@ -35,7 +35,7 @@ def train(device):
         # different subject different config
         config.subject_id = i + 1
         config.fmax = 38
-        config.epochs = 20
+        config.patience = 20
         if config.subject_id == 2:
             config.fmax = 100
         elif config.subject_id == 4:
