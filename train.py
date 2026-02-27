@@ -28,7 +28,7 @@ def train(device):
         weight_decay=0,
         fmin=0,
         fmax=38,
-        remove_bad_trial=False,
+        remove_bad_trial=True,
         scheduler="NoScheduler"
 
     )
