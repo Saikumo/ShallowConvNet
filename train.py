@@ -41,7 +41,8 @@ def train(device):
         elif config.subject_id == 5:
             config.remove_bad_trial = True
 
-        X_train, y_train, X_val, y_val, X_test, y_test = preprocess_train_bnci2014_001(i + 1, config.fmin, config.fmax)
+        X_train, y_train, X_val, y_val, X_test, y_test = preprocess_train_bnci2014_001(i + 1, config.fmin, config.fmax,
+                                                                                       config.remove_bad_trial)
 
         train_dataset, val_dataset, test_dataset = EEGDataset(X_train, y_train), EEGDataset(X_val, y_val), EEGDataset(
             X_test, y_test)
