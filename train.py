@@ -39,9 +39,9 @@ def train(device):
         if config.subject_id == 2:
             config.fmax = 100
         elif config.subject_id == 4:
-            config.epochs = 50
+            config.patience = 50
         elif config.subject_id == 5:
-            config.epochs = 50
+            config.patience = 50
             config.fmax = 100
 
         X_train, y_train, X_val, y_val, X_test, y_test = preprocess_train_bnci2014_001(i + 1, config.fmin, config.fmax,
